@@ -46,7 +46,7 @@ async def test_illustrator_deduplication_and_no_repeated_images(tmp_path: Path):
 @pytest.mark.asyncio
 async def test_house_ads_and_comics_rendered_in_blank_spaces(tmp_path: Path):
     """
-    Verifies that 'Your Muse Brief' house advertisements and satirical comic strips
+    Verifies that 'The Muse Newz' house advertisements and satirical comic strips
     are placed in whitespace slots across the newspaper pages (Front, Section, Inside, Closing).
     """
     store = StorageService(db_path=tmp_path / "test_ads.db", editions_dir=tmp_path / "editions_ads")

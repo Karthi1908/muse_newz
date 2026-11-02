@@ -77,7 +77,7 @@
 | **FR-038** | Pre-seeded archive (1 sample/format) + `2-minute` Demo Mode | §2 | `CHK-R28` | `T006`, `T028`, `T032` | `T031`, `T033` (`SC-012`) |
 | **FR-039** | Page layout whitespace analysis via Meta SAM-3 (`sam-3.1`) segmentation | §4.6 | `CHK-R29` | `T034`, `T035` | `T038` (`SC-013`) |
 | **FR-040** | Size tier classification (`compact`, `column`, `banner`) & density guard | §4.6 | `CHK-R30` | `T034`, `T035` | `T038` |
-| **FR-041** | Dedicated `WhitespaceCreativeAgent` crafts topic-specific comic jokes or Muse Brief ads | §4.7 | `CHK-R31` | `T036`, `T037` | `T038` (`SC-013`) |
+| **FR-041** | Dedicated `WhitespaceCreativeAgent` crafts topic-specific comic jokes or Muse Newz ads | §4.7 | `CHK-R31` | `T036`, `T037` | `T038` (`SC-013`) |
 | **FR-042** | Single broadsheet design tokens, labelled as satire or ad, HTML-escaped | §4.7, §4.8 | `CHK-R31` | `T036`, `T037` | `T038` |
 | **FR-043** | Full live generation of comic dialogue + woodcut illustration via `muse-image-1.0` | §4.7 | `CHK-R32` | `T036`, `T039` | `T038` |
 | **FR-044** | Explicit `15s` timeout, CSS grid fallback, and cached demo fixtures | §4.6, §4.7 | `CHK-R32` | `T035`, `T039` | `T038` |

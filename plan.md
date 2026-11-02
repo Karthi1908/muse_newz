@@ -15,7 +15,7 @@ To maximize prize competitiveness at the **Meta Global AI Developer Hackathon** 
 | **Writer & Fact-Checker Loops** | `ParallelAgent` of `LoopAgent(max_iterations=2)` | **Muse Spark** (Writer + Claim-Verifier with `escalate=True` on pass) | Runs story verification loops in parallel; enforces up to 2 adversarial fact-check passes per story. |
 | **Illustrator Tool** | `FunctionTool` / `LlmAgent` | **Muse Image** (`muse-image-1.0` via `/v1/images/generations`) | Generates consistent broadsheet woodcut editorial engravings for verified stories. |
 | **SAM-3 Blank-Space Analyzer** | Deterministic Tool / Service | **SAM-3 / SAM-3.1** (`POST /v1/responses` Promptable Concept Segmentation) | Segments rendered page layout to locate unallocated blank spaces (bounding boxes & size tiers). |
-| **Whitespace Creative Agent** | `LlmAgent` | **Muse Spark** (`muse-spark`) + **Muse Image** (`muse-image-1.0`) | Evaluates blank spaces and crafts topic-specific satirical comics or "Your Muse Brief" house ads. |
+| **Whitespace Creative Agent** | `LlmAgent` | **Muse Spark** (`muse-spark`) + **Muse Image** (`muse-image-1.0`) | Evaluates blank spaces and crafts topic-specific satirical comics or "The Muse Newz" house ads. |
 | **Formatter & Publisher** | `FunctionTool` | Deterministic Jinja2 Multi-Page Engine + CSS Grid Tokens | Compiles verified stories, claim audit trails, illustrations, and whitespace fillers into single-file HTML/PDF. |
 
 ---
@@ -57,7 +57,7 @@ flowchart TD
     subgraph Phase5 ["Phase 5: Layout Composition & Whitespace Enrichment"]
         direction TB
         PreLayout["Page Blueprint & Grid Assembler"] --> SAM3["SAM-3 Layout Analyzer (sam-3.1)\nSegment Anything Blank-Space Bounding Boxes"]
-        SAM3 --> WS_Agent["Whitespace Creative Agent (LlmAgent)\nTopic-Specific Satirical Comics & Muse Brief Ads"]
+        SAM3 --> WS_Agent["Whitespace Creative Agent (LlmAgent)\nTopic-Specific Satirical Comics & Muse Newz Ads"]
         WS_Agent --> WS_Illus["Live Muse Image Engraving / Cached Woodcut"]
         WS_Illus --> FinalPublisher["Jinja2 Multi-Page Publisher\nEmbeds Versioned CSS & Single-File HTML"]
     end
@@ -233,7 +233,7 @@ The project connects to Meta's Model API (`https://api.meta.ai/v1`) using Google
 - **Agent Type:** Google ADK `LlmAgent` powered by `muse-spark`.
 - **Allocation Policy (Decision #10):**
   - **Front & Section Pages:** Prioritize topic-specific satirical comic jokes.
-  - **Inside & Closing Pages:** Prioritize **"Your Muse Brief"** house advertisements.
+  - **Inside & Closing Pages:** Prioritize **"The Muse Newz"** house advertisements.
 - **Satirical Humour Style (Decision #12):**
   - Topic-specific broadsheet satire lampooning the edition's actual researched topics (e.g. AI hype, biotech frontiers, grid storage, orbital tech).
   - Comic dialogues branded under *The Mechanical Muse* or *The Newsroom Dispatches*.
@@ -261,7 +261,7 @@ The project connects to Meta's Model API (`https://api.meta.ai/v1`) using Google
 ### Milestone 4: SAM-3 Layout Segmentation & Whitespace Creative Agent (New)
 1. **Pydantic Contracts:** Add `WhitespaceRegion` and `WhitespaceFillerItem` to `app/models/schemas.py`.
 2. **SAM-3 Analyzer Service:** Build `app/services/sam_layout_analyzer.py` calling `sam-3.1` via `/v1/responses` with CSS grid fallback.
-3. **Whitespace Creative Agent:** Build `app/agents/whitespace_agent.py` generating topic-specific satirical comics or Muse Brief house ads with live `muse-image-1.0` woodcut illustrations.
+3. **Whitespace Creative Agent:** Build `app/agents/whitespace_agent.py` generating topic-specific satirical comics or Muse Newz house ads with live `muse-image-1.0` woodcut illustrations.
 4. **Pipeline & Template Integration:** Wire Stage 4b/4c into `app/services/runner.py` and `app/services/formatter.py`.
 5. **Testing & Validation:** Write comprehensive test suite `tests/test_sam3_whitespace_agent.py` covering segmentation, size tiers, topic satire, and offline fallbacks.
 6. **Centrepiece Most-Mentioned News, Strict Image/News Deduplication, Vertical/Horizontal Alignment & Geographic Preference (`/speckit-clarify` Session 2, Decisions #13–#16):**

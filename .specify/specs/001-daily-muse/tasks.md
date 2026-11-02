@@ -97,14 +97,14 @@
   - Implements deterministic CSS grid remainder fallback (`12 - sum(column_spans)`) when offline or on timeout (`15s`).
 - [x] **T036** [FR-041, FR-042, FR-043, Principle 3] Implement `app/agents/whitespace_agent.py` (`WhitespaceCreativeAgent`):
   - Uses Google ADK `LlmAgent` + `MUSE_TEXT_MODEL` (`muse-spark`).
-  - Evaluates page blank spaces with Balanced Cadence-Aware Allocation (Front & Section -> comic jokes; Inside & Closing -> Muse Brief house ads).
-  - Generates topic-specific satirical comic commentary lampooning the edition's researched topics (*The Mechanical Muse* / *The Newsroom Dispatches*) or "Your Muse Brief" ad copy.
+  - Evaluates page blank spaces with Balanced Cadence-Aware Allocation (Front & Section -> comic jokes; Inside & Closing -> Muse Newz house ads).
+  - Generates topic-specific satirical comic commentary lampooning the edition's researched topics (*The Mechanical Muse* / *The Newsroom Dispatches*) or "The Muse Newz" ad copy.
   - Coordinates live generation of satirical monochrome woodcut engravings via `muse-image-1.0` with cached demo fallback (`data/demo_cache/images/`).
 - [x] **T037** [FR-041, FR-042, FR-043, Principle 6] Wire Stage 4b (SAM-3 analysis) and Stage 4c (Whitespace Creative Agent) into `app/services/runner.py` pipeline and update `app/services/formatter.py` + Jinja2 templates (`front.html`, `inside.html`, `section.html`, `closing.html`, `comic_strip_box.html`, `house_ad_box.html`, `curiosities_box.html`) to render dynamic whitespace fillers without layout overflow.
 - [x] **T038** [P] [SC-013, Principle 8] Write unit and integration test suite in `tests/test_sam3_whitespace_agent.py`:
   - Validates SAM-3 promptable concept segmentation response parsing and bounding-box size-tier classification.
   - Tests CSS grid remainder fallback when SAM-3 endpoint is offline or times out.
-  - Verifies topic-specific satirical comic copy generation and Muse Brief ad copy generation.
+  - Verifies topic-specific satirical comic copy generation and Muse Newz ad copy generation.
   - Validates that no duplicate filler items are placed adjacently and that `< 8%` whitespace pages are left uncluttered.
 - [x] **T039** [FR-044, CHK-C01, Principle 1] Update `scripts/generate_comic_assets.py` and ensure `data/demo_cache/` contains pre-generated topic-specific and newsroom woodcut engravings for live hackathon demo resilience under `DEMO_CACHE_MODE=fallback`.
 

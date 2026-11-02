@@ -99,7 +99,7 @@ COMIC_TOPIC_FALLBACKS = [
     },
 ]
 
-MUSE_BRIEF_AD_FALLBACKS = [
+MUSE_NEWZ_AD_FALLBACKS = [
     {
         "variant_key": "owl",
         "eyebrow": "The Sovereign Fact-Checker’s Emblem",
@@ -139,6 +139,7 @@ MUSE_BRIEF_AD_FALLBACKS = [
         "image_path": "/static/images/ads/ad_muse_brief_press.png",
     },
 ]
+MUSE_BRIEF_AD_FALLBACKS = MUSE_NEWZ_AD_FALLBACKS
 
 CURIOSITIES_EPIGRAM_FALLBACKS = [
     {
@@ -193,7 +194,7 @@ class WhitespaceCreativeAgent:
     Rules:
     - Balanced Cadence-Aware Allocation (Decision #10):
       Front pages & Section pages -> Topic-specific satirical comic jokes.
-      Inside pages & Closing pages -> "Your Muse Brief" house ads or epigram wit.
+      Inside pages & Closing pages -> "The Muse Newz" house ads or epigram wit.
     - Topic-Specific Satirical Commentary (Decision #12):
       Humor specifically lampoons the edition's researched topics (AI hype, clean tech, biotech, etc.).
     - Single Newspaper Identity & Escaping (Principle 4 & 6):
@@ -250,7 +251,7 @@ class WhitespaceCreativeAgent:
     ) -> WhitespaceFillerItem:
         # Decision #10: Balanced Cadence-Aware Allocation Policy
         # First primary slot on front/section/inside gets a satirical comic strip;
-        # Second column/banner slot on the same page gets a 'Your Muse Brief' house ad;
+        # Second column/banner slot on the same page gets a 'The Muse Newz' house ad;
         # Compact slots get Newsroom Curiosities & Wit epigrams.
         prefer_comic = (
             slot_index == 0

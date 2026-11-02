@@ -49,7 +49,7 @@ In strict accordance with **Principle 2 (Deterministic where possible)** and **P
 - **Beat Reporter Agents (`ParallelAgent` of `LlmAgent`s):** Synthesize search results for a single beat and extract candidate stories with source URLs.
 - **Editor Agent (`LlmAgent`):** Ranks candidate stories across beats, selects the configured number of lead/feature stories, and selects the mandatory **Blind Spot** slot.
 - **Writer & Fact-Checker Agents (`LoopAgent`):** The Writer drafts/revises articles with inline citations; the Fact-Checker extracts atomic claims and evaluates entailment against verbatim source text.
-- **Whitespace Creative Agent (`LlmAgent`):** Evaluates page blank-space regions segmented by Meta's **Segment Anything Model (`sam-3` / `sam-3.1`)** alongside the edition's verified topics, decides whether each blank space should carry a small satirical comic joke, newsroom epigram, or a `"Your Muse Brief"` house advertisement sized to the space tier (`compact`, `column`, `banner`), and crafts the space-fitted comic dialogue or ad copy.
+- **Whitespace Creative Agent (`LlmAgent`):** Evaluates page blank-space regions segmented by Meta's **Segment Anything Model (`sam-3` / `sam-3.1`)** alongside the edition's verified topics, decides whether each blank space should carry a small satirical comic joke, newsroom epigram, or a `"The Muse Newz"` house advertisement sized to the space tier (`compact`, `column`, `banner`), and crafts the space-fitted comic dialogue or ad copy.
 
 ### 3.2 Where Deterministic Code, Tools & Services Are Used (Never LLMs)
 - **De-duplication & URL Normalization:** Deterministic Python URL canonicalization and title similarity checks before candidate stories reach the Editor.

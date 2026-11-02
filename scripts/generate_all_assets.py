@@ -16,19 +16,19 @@ CACHE_DIR.mkdir(parents=True, exist_ok=True)
 ITEMS_TO_GENERATE = [
     {
         "key": "ad_muse_brief_press",
-        "headline": "Your Muse Brief: Morning Dispatch Edition",
+        "headline": "The Muse Newz: Morning Dispatch Edition",
         "topic": "House Advertisement",
         "prompt": "Classic vintage broadsheet newspaper woodcut advertisement, monochrome ink engraving, antique Gutenberg printing press with scrolls and heraldic banner, warm newsprint paper, fine crosshatching, ornate engraving style",
     },
     {
         "key": "ad_muse_brief_pocket",
-        "headline": "Your Muse Brief: 3-Minute Verification Digest",
+        "headline": "The Muse Newz: 3-Minute Verification Digest",
         "topic": "House Advertisement",
         "prompt": "Classic vintage broadsheet newspaper woodcut advertisement, monochrome ink engraving, vintage pocket watch with Roman numerals beside folded newspaper and steam coffee cup, ornate woodcut corner filigree, newsprint texture",
     },
     {
         "key": "ad_muse_brief_owl",
-        "headline": "Your Muse Brief: The Fact-Checker's Emblem",
+        "headline": "The Muse Newz: The Fact-Checker's Emblem",
         "topic": "House Advertisement",
         "prompt": "Classic vintage broadsheet newspaper engraving emblem, wise classical owl perched on open ledger with scales of justice and quill pen, monochrome woodcut etching, warm newsprint paper",
     },

@@ -131,8 +131,9 @@ def verify_page_dom(page_section: BeautifulSoup, page_num: int, total_pages: int
         if house_ad:
             report.total_fillers_checked += 1
             title_el = house_ad.find("h3", class_="house-ad-title")
-            if not title_el or "YOUR MUSE BRIEF" not in title_el.get_text(strip=True).upper():
-                report.add_issue(page_desc, f"House ad in slot #{s_idx} missing 'YOUR MUSE BRIEF' title")
+            title_text = title_el.get_text(strip=True).upper() if title_el else ""
+            if not title_el or ("MUSE NEWZ" not in title_text and "MUSE BRIEF" not in title_text):
+                report.add_issue(page_desc, f"House ad in slot #{s_idx} missing 'THE MUSE NEWZ' title")
             copy_el = house_ad.find("p", class_="house-ad-copy")
             if not copy_el or len(copy_el.get_text(strip=True)) < 40:
                 report.add_issue(page_desc, f"House ad in slot #{s_idx} missing body copy")

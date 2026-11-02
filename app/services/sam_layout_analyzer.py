@@ -154,7 +154,7 @@ def compute_grid_fallback_regions(
                 )
             )
         else:
-            # Full row of 3 briefs -> Side-by-side Comic Strip (6 cols) + Muse Brief Ad (6 cols) before corrections
+            # Full row of 3 briefs -> Side-by-side Comic Strip (6 cols) + The Muse Newz Ad (6 cols) before corrections
             regions.append(
                 WhitespaceRegion(
                     region_id=f"ws_p{page_number}_inside_banner",

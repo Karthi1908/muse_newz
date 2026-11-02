@@ -80,7 +80,7 @@ async def test_whitespace_creative_agent_balanced_allocation():
     """
     Verifies Balanced Cadence-Aware Allocation policy (Decision #10):
     - Front/Section pages prioritize satirical comic jokes in the primary slot and pair with house ads & wit.
-    - Inside/Closing pages prioritize 'Your Muse Brief' ads or epigram wit.
+    - Inside/Closing pages prioritize 'The Muse Newz' ads or epigram wit.
     """
     agent = WhitespaceCreativeAgent()
     topics = ["Quantum Computing", "Clean Tech Batteries"]
@@ -96,7 +96,7 @@ async def test_whitespace_creative_agent_balanced_allocation():
     assert front_fillers[1].filler_type == "muse_brief_ad"
     assert front_fillers[2].filler_type == "epigram_wit"
 
-    # Closing page -> Muse Brief house ad
+    # Closing page -> The Muse Newz house ad
     close_regs = compute_grid_fallback_regions("closing", 3, 1, "weekly")
     close_fillers = await agent.create_fillers_for_page(3, "closing", close_regs, topics, used)
     assert len(close_fillers) == 1
