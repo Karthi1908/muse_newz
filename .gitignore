@@ -1,0 +1,38 @@
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+env/
+
+# Python Bytecode & Caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Editor & IDE Configs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Runtime SQLite & Generated Editions (keep demo_cache tracked)
+data/your_daily_muse.db
+data/your_daily_muse.db-*
+data/*.db
+data/*.db-*
+data/editions/
+data/test_verification_editions/
+

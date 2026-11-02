@@ -1,0 +1,61 @@
+<!-- Page Template: Weekly Closing Page (Outside-Topics Feature, Week's Corrections, Sources Index) -->
+<section class="newspaper-page page-template-closing" data-page-number="{{ page.page_number }}">
+  {% include "partials/running_header.html" %}
+
+  <div class="section-page-banner">
+    <h2 class="section-page-heading">{{ page.section_flag }}</h2>
+  </div>
+
+  <div class="closing-page-grid">
+    {% for article in page.articles %}
+      <div class="grid-slot slot-{{ article.slot_kind }}">
+        {% include "partials/article_block.html" %}
+      </div>
+    {% endfor %}
+  </div>
+
+  {% include "partials/corrections_box.html" %}
+
+  <!-- Weekly Closing Page House Advertisement & Fillers -->
+  <div class="closing-ad-banner" style="margin: 1.5rem 0;">
+    {% if page.whitespace_fillers and page.whitespace_fillers|length > 0 %}
+      {% set filler = page.whitespace_fillers[0] %}
+      {% if filler.filler_type == "comic_joke" %}
+        {% include "partials/comic_strip_box.html" %}
+      {% elif filler.filler_type == "muse_brief_ad" %}
+        {% with ad_layout="horizontal" %}
+          {% include "partials/house_ad_box.html" %}
+        {% endwith %}
+      {% else %}
+        {% include "partials/curiosities_box.html" %}
+      {% endif %}
+    {% else %}
+      {% with ad_variant="owl", ad_layout="horizontal" %}
+        {% include "partials/house_ad_box.html" %}
+      {% endwith %}
+    {% endif %}
+  </div>
+
+  <section class="weekly-sources-ledger">
+    <h3 class="sources-ledger-title">Complete Weekly Primary Sources Index</h3>
+    <ul class="sources-ledger-list">
+      {% for p in edition.pages %}
+        {% for art in p.articles %}
+          {% for src in art.sources %}
+            <li>
+              <strong>Page {{ p.page_number }} ({{ art.topic }}):</strong>
+              <a href="{{ src.url }}" target="_blank" rel="noopener noreferrer">{{ src.source_name }} — {{ art.headline }}</a>
+              <span>({{ src.published_date }})</span>
+            </li>
+          {% endfor %}
+        {% endfor %}
+      {% endfor %}
+    </ul>
+  </section>
+
+  <footer class="newspaper-page-footer">
+    <span>{{ edition.publication_title }} · Edition No. {{ edition.edition_number }} ({{ edition.format_label }})</span>
+    <span class="design-version-stamp" data-testid="design-version-footer">Design Identity v{{ edition.design_version }}</span>
+    <span>Page {{ page.page_number }} of {{ edition.total_pages }}</span>
+  </footer>
+</section>

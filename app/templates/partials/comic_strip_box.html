@@ -1,0 +1,72 @@
+<!-- Partial: The Daily Muse Broadsheet Comic Strip & Satire Panel -->
+{% set comic_variant = (filler and filler.variant_key) or comic_variant | default("mechanical") %}
+{% set comic_orient = (filler and filler.layout_orientation) or comic_layout | default("vertical") %}
+
+<aside class="newspaper-comic-box comic-layout-{{ comic_orient }}" data-testid="comic-strip-box" role="complementary" aria-label="The Daily Muse Editorial Comic">
+  <div class="comic-inner-frame">
+    <header class="comic-header">
+      <div class="comic-banner">{{ (filler and filler.title) or "THE MECHANICAL MUSE" }}</div>
+      <div class="comic-subtitle">
+        {% if filler and filler.subtitle_or_eyebrow %}
+          {{ filler.subtitle_or_eyebrow }}
+        {% elif comic_variant == "trap" %}
+          NO. 43: THE HALLUCINATION NET &amp; THE SAGE OWL
+        {% else %}
+          NO. 42: THE TYPESETTER’S VERIFICATION DILEMMA
+        {% endif %}
+      </div>
+    </header>
+
+    <div class="comic-body-row">
+      <div class="comic-image-frame">
+        {% if filler and (filler.image_data_uri or filler.image_path) %}
+          <img
+            src="{{ filler.image_data_uri or filler.image_path }}"
+            data-image-path="{{ filler.image_path or '/static/images/comics/comic_mechanical_muse.png' }}"
+            alt="Satirical Comic: {{ filler.title }}"
+            class="comic-image"
+            loading="lazy"
+          />
+        {% elif comic_variant == "trap" %}
+          <img
+            src="/static/images/comics/comic_hallucination_trap.png"
+            data-image-path="/static/images/comics/comic_hallucination_trap.png"
+            alt="Satirical Comic: The Hallucination Trap"
+            class="comic-image"
+            loading="lazy"
+          />
+        {% else %}
+          <img
+            src="/static/images/comics/comic_mechanical_muse.png"
+            data-image-path="/static/images/comics/comic_mechanical_muse.png"
+            alt="Satirical Comic: The Mechanical Muse"
+            class="comic-image"
+            loading="lazy"
+          />
+        {% endif %}
+      </div>
+
+      <div class="comic-caption-box">
+        <p class="comic-dialogue">
+          {% if filler and filler.dialogue_or_copy %}
+            {{ filler.dialogue_or_copy | replace("\n", "<br/>") | safe }}
+          {% elif comic_variant == "trap" %}
+            <strong>Fact-Checker:</strong> “Behold, sir! A wild speculative assertion captured in my primary-source butterfly net!”<br/>
+            <strong>The Owl:</strong> “Fascinating specimen. Note how its confidence score drops from 99.8% to zero upon contact with an audit ledger.”
+          {% else %}
+            <strong>Editor:</strong> “Tell me, automaton, why hast thou cited nine government registers for a dispatch on tea?”<br/>
+            <strong>Automaton:</strong> “Lest the Gatekeeper strike it down as unverified gossip, sir! Black tea verified; lemon was hallucinated in Stage 1.”
+          {% endif %}
+        </p>
+        <div class="comic-footer-signoff">
+          {% if filler and filler.caption_or_motto %}
+            <span>{{ filler.caption_or_motto }}</span>
+          {% else %}
+            <span>DRAWN EXCLUSIVELY FOR THE DAILY MUSE</span>
+            <span>★ VERITAS IN JEST ★</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</aside>

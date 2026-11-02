@@ -1,0 +1,55 @@
+/* AUTO-GENERATED FROM design/tokens.v1.json — Design Version 1.0.0 */
+/* DO NOT EDIT MANUALLY. Principle 6: One design, many formats. */
+:root {
+  --design-version: "1.0.0";
+  --font-masthead: 'UnifrakturMaguntia', 'Old English Text MT', 'Engravers Old English BT', Georgia, serif;
+  --font-headline: 'Playfair Display', 'Times New Roman', Georgia, serif;
+  --font-body: 'Source Serif 4', 'Charter', Georgia, serif;
+  --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+
+  --scale-masthead: clamp(2.6rem, 5vw, 4.25rem);
+  --scale-lead-headline: 2.15rem;
+  --scale-feature-headline: 1.75rem;
+  --scale-secondary-headline: 1.35rem;
+  --scale-brief-headline: 1.1rem;
+  --scale-deck: 1.02rem;
+  --scale-body: 0.98rem;
+  --scale-caption: 0.82rem;
+  --scale-meta: 0.75rem;
+
+  --bg-paper: #F7F3E8;
+  --bg-elevated: #EFEAD8;
+  --ink-primary: #141413;
+  --ink-secondary: #3D3A36;
+  --ink-muted: #66615B;
+  --rule-heavy: #141413;
+  --rule-light: #BFB8A8;
+  --outside-tint: #EDE5CE;
+
+  --verified-fg: #1B5E20;
+  --verified-bg: #E8F5E9;
+  --corrected-removed-fg: #B71C1C;
+  --corrected-removed-bg: #FFEBEE;
+
+  --grid-max-width: 1240px;
+  --grid-column-gap: 1.5rem;
+  --rule-heavy-border: 3px double var(--rule-heavy);
+  --rule-thin-border: 1px solid var(--rule-light);
+}
+
+[data-theme="dark"] {
+  --bg-paper: #161615;
+  --bg-elevated: #201F1D;
+  --ink-primary: #EDE8DC;
+  --ink-secondary: #C7C1B4;
+  --ink-muted: #8F897D;
+  --rule-heavy: #EDE8DC;
+  --rule-light: #3B3935;
+  --outside-tint: #25221B;
+
+  --verified-fg: #81C784;
+  --verified-bg: #142916;
+  --corrected-removed-fg: #E57373;
+  --corrected-removed-bg: #2D1414;
+}

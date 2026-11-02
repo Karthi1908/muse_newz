@@ -1,0 +1,30 @@
+{
+  "format_name": "bulletin",
+  "story_window_start": "2026-10-31T00:00:00Z",
+  "story_window_end": "2026-10-31T06:00:00Z",
+  "candidates_by_topic": {
+    "Frontier AI & Agentic Systems": [
+      {
+        "candidate_id": "fix_cand_1",
+        "topic": "Frontier AI & Agentic Systems",
+        "headline": "Open-Weights Multi-Agent Benchmarks Show 38% Latency Drop Through Parallel Verification Loops",
+        "summary": "Parallel beat retrieval paired with two-round claim verification cuts factual error rates below 1.2%.",
+        "relevance_score": 9.5,
+        "story_fingerprint": "a1b2c3d4e5f60001",
+        "is_outside_topic": false,
+        "is_follow_up": false,
+        "sources": [
+          {
+            "source_id": "S1",
+            "source_name": "Journal of Applied AI Systems",
+            "url": "https://ai-systems-journal.example.org/2026/10/parallel-verification-loops-benchmark",
+            "published_date": "2026-10-30",
+            "verbatim_text": "A consortium of 14 distributed systems laboratories published the Autumn 2026 Agentic Reliability Benchmark on October 30, 2026, evaluating 2,400 production multi-agent workflows. The report found that executing topic research agents in parallel and enforcing a two-round writer and fact-checker loop reduced unsupported factual claims from 14.6% down to 1.1% across long-form synthesis tasks. End-to-end pipeline latency dropped by 38% compared to sequential agent chains, averaging 19.4 seconds per five-story briefing on standard cloud instances."
+          }
+        ]
+      }
+    ]
+  },
+  "outside_candidates": [],
+  "empty_topics": []
+}

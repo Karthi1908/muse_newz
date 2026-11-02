@@ -1,0 +1,125 @@
+{
+  "version": "1.0.0",
+  "cadence_to_format": {
+    "every_4h": "bulletin",
+    "every_8h": "bulletin",
+    "every_12h": "daily",
+    "daily": "daily",
+    "weekly": "weekly"
+  },
+  "cadence_hours": {
+    "every_4h": 4,
+    "every_8h": 8,
+    "every_12h": 12,
+    "daily": 24,
+    "weekly": 168
+  },
+  "slot_specs": {
+    "lead":      { "min_words": 260, "max_words": 400, "min_verified_claims": 3, "drop_cap": true },
+    "feature":   { "min_words": 300, "max_words": 480, "min_verified_claims": 3, "drop_cap": true },
+    "secondary": { "min_words": 170, "max_words": 260, "min_verified_claims": 2, "drop_cap": false },
+    "brief":     { "min_words": 90,  "max_words": 150, "min_verified_claims": 2, "drop_cap": false }
+  },
+  "formats": {
+    "bulletin": {
+      "label": "Bulletin",
+      "cadences": ["every_4h", "every_8h"],
+      "min_pages": 1,
+      "max_pages": 1,
+      "total_articles": 3,
+      "outside_topics_count": 0,
+      "illustrated_slots_max": 1,
+      "window_buffer_hours": 2,
+      "no_repeat_lookback_days": 7,
+      "allow_follow_ups": false,
+      "pages": [
+        {
+          "page_number": 1,
+          "template": "front",
+          "section_flag": "Bulletin Edition",
+          "slots": [
+            { "slot_id": "p1_lead", "kind": "lead", "illustrated": true, "outside_topics": false },
+            { "slot_id": "p1_brief_1", "kind": "brief", "illustrated": false, "outside_topics": false },
+            { "slot_id": "p1_brief_2", "kind": "brief", "illustrated": false, "outside_topics": false }
+          ]
+        }
+      ]
+    },
+    "daily": {
+      "label": "Daily",
+      "cadences": ["every_12h", "daily"],
+      "min_pages": 2,
+      "max_pages": 2,
+      "total_articles": 8,
+      "outside_topics_count": 1,
+      "illustrated_slots_max": 2,
+      "window_buffer_hours": 2,
+      "no_repeat_lookback_days": 7,
+      "allow_follow_ups": false,
+      "pages": [
+        {
+          "page_number": 1,
+          "template": "front",
+          "section_flag": "Front Page",
+          "slots": [
+            { "slot_id": "p1_lead", "kind": "lead", "illustrated": true, "outside_topics": false },
+            { "slot_id": "p1_sec_1", "kind": "secondary", "illustrated": false, "outside_topics": false },
+            { "slot_id": "p1_sec_2", "kind": "secondary", "illustrated": false, "outside_topics": false },
+            { "slot_id": "p1_brief_1", "kind": "brief", "illustrated": false, "outside_topics": false },
+            { "slot_id": "p1_outside", "kind": "brief", "illustrated": true, "outside_topics": true }
+          ]
+        },
+        {
+          "page_number": 2,
+          "template": "inside",
+          "section_flag": "Inside Dispatches",
+          "slots": [
+            { "slot_id": "p2_brief_1", "kind": "brief", "illustrated": false, "outside_topics": false },
+            { "slot_id": "p2_brief_2", "kind": "brief", "illustrated": false, "outside_topics": false },
+            { "slot_id": "p2_brief_3", "kind": "brief", "illustrated": false, "outside_topics": false }
+          ]
+        }
+      ]
+    },
+    "weekly": {
+      "label": "Weekly",
+      "cadences": ["weekly"],
+      "min_pages": 3,
+      "max_pages": 7,
+      "max_articles": 16,
+      "outside_topics_count": 1,
+      "illustrated_slots_max": 7,
+      "fixed_window_days": 7,
+      "window_buffer_hours": 2,
+      "no_repeat_lookback_days": 28,
+      "allow_follow_ups": true,
+      "front_page": {
+        "template": "front",
+        "section_flag": "The Week's Front Page",
+        "slots": [
+          { "slot_id": "wk_p1_lead", "kind": "lead", "illustrated": true, "outside_topics": false },
+          { "slot_id": "wk_p1_sec_1", "kind": "secondary", "illustrated": false, "outside_topics": false },
+          { "slot_id": "wk_p1_sec_2", "kind": "secondary", "illustrated": false, "outside_topics": false },
+          { "slot_id": "wk_p1_brief_1", "kind": "brief", "illustrated": false, "outside_topics": false },
+          { "slot_id": "wk_p1_brief_2", "kind": "brief", "illustrated": false, "outside_topics": false }
+        ]
+      },
+      "per_topic_section_page": {
+        "template": "section",
+        "slots": [
+          { "slot_id_pattern": "wk_sec_{topic_idx}_feature", "kind": "feature", "illustrated": true, "outside_topics": false },
+          { "slot_id_pattern": "wk_sec_{topic_idx}_brief", "kind": "brief", "illustrated": false, "outside_topics": false }
+        ]
+      },
+      "closing_page": {
+        "template": "closing",
+        "section_flag": "Outside Your Usual Reading & Weekly Audit",
+        "slots": [
+          { "slot_id": "wk_closing_outside", "kind": "feature", "illustrated": true, "outside_topics": true }
+        ],
+        "includes_corrections_ledger": true,
+        "includes_sources_index": true
+      }
+    }
+  }
+}

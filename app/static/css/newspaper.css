@@ -1,0 +1,945 @@
+/* Your Daily Muse — Broadsheet Layout & Print Stylesheet (Principle 6) */
+/* Consumes design tokens exclusively from tokens.v1.css */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-paper);
+  color: var(--ink-primary);
+  font-family: var(--font-body);
+  font-size: var(--scale-body);
+  line-height: 1.58;
+}
+
+a {
+  color: var(--ink-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.newspaper-edition-container {
+  max-width: var(--grid-max-width);
+  margin: 0 auto;
+  padding: 1rem 1.25rem 3rem;
+}
+
+.newspaper-page {
+  background-color: var(--bg-paper);
+  border: var(--rule-thin-border);
+  padding: 1.75rem 2rem;
+  margin-bottom: 2.25rem;
+}
+
+/* Fixed Masthead (Page 1 across all formats) */
+.newspaper-masthead {
+  border-bottom: var(--rule-heavy-border);
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.5rem;
+}
+
+.masthead-top-bar {
+  display: grid;
+  grid-template-columns: 220px 1fr 240px;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 0.75rem;
+}
+
+.masthead-ear {
+  border: var(--rule-thin-border);
+  background-color: var(--bg-elevated);
+  padding: 0.55rem 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-family: var(--font-ui);
+}
+
+.ear-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.ear-value {
+  font-size: 0.85rem;
+  color: var(--ink-primary);
+}
+
+.ear-sub {
+  font-size: 0.72rem;
+  color: var(--ink-secondary);
+}
+
+.masthead-title-block {
+  text-align: center;
+}
+
+.masthead-blackletter {
+  font-family: var(--font-masthead);
+  font-size: var(--scale-masthead);
+  font-weight: 400;
+  margin: 0;
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+}
+
+.masthead-motto {
+  margin: 0.25rem 0 0;
+  font-style: italic;
+  font-size: var(--scale-caption);
+  color: var(--ink-secondary);
+}
+
+.masthead-edition-line {
+  border-top: var(--rule-heavy-border);
+  border-bottom: var(--rule-thin-border);
+  padding: 0.38rem 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-ui);
+  font-size: var(--scale-meta);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Running Header on Inside, Section, and Closing Pages */
+.newspaper-running-header {
+  border-bottom: var(--rule-heavy-border);
+  padding-bottom: 0.45rem;
+  margin-bottom: 1.25rem;
+}
+
+.running-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--font-ui);
+  font-size: var(--scale-meta);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.running-pub-title {
+  font-family: var(--font-masthead);
+  font-size: 1.35rem;
+  text-transform: none;
+}
+
+.running-section-flag {
+  font-weight: 700;
+}
+
+/* Multi-Column Grids */
+.front-page-grid,
+.inside-page-grid,
+.section-page-grid,
+.closing-page-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--grid-column-gap);
+  align-items: stretch;
+  width: 100%;
+}
+
+.grid-slot {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+/* 3-Column Broadsheet Front Page with Central Centrepiece */
+.front-col-wing {
+  grid-column: span 3;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.front-col-centrepiece {
+  grid-column: span 6;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  border-left: var(--rule-thin-border);
+  border-right: var(--rule-thin-border);
+  padding: 0 1.25rem;
+}
+
+/* 2-Column Bulletin Front Page */
+.front-col-bulletin-main {
+  grid-column: span 7;
+  min-width: 0;
+  border-left: none;
+  border-right: var(--rule-thin-border);
+  padding-left: 0;
+  padding-right: 1.25rem;
+}
+
+.front-col-bulletin-side {
+  grid-column: span 5;
+  min-width: 0;
+}
+
+.centrepiece-ribbon {
+  background-color: var(--ink-primary);
+  color: var(--bg-paper);
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 0.32rem 0.65rem;
+  margin-bottom: 0.65rem;
+}
+
+.slot-centrepiece-lead .article-body,
+.slot-centrepiece-sub .article-body,
+.newspaper-article.layout-horizontal .article-body {
+  column-count: 2;
+  column-gap: 1.35rem;
+  column-rule: 1px solid rgba(20, 20, 19, 0.15);
+  text-align: justify;
+}
+
+.slot-centrepiece-lead .article-body p,
+.slot-centrepiece-sub .article-body p,
+.newspaper-article.layout-horizontal .article-body p {
+  margin-top: 0;
+}
+
+.newspaper-article.layout-vertical .article-body {
+  column-count: 1;
+}
+
+.inside-page-grid .grid-slot {
+  grid-column: span 4;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.inside-page-grid .grid-slot > .newspaper-article,
+.inside-page-grid .grid-slot > aside {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Balanced Section Page Columns */
+.section-col-main {
+  grid-column: span 7;
+  min-width: 0;
+  border-right: var(--rule-thin-border);
+  padding-right: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.section-col-side {
+  grid-column: span 5;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.slot-filler-grow {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.slot-filler-grow > aside {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.slot-filler-grow > aside > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.closing-page-grid .grid-slot {
+  grid-column: span 12;
+}
+
+/* Article Furniture */
+.newspaper-article {
+  padding-bottom: 1rem;
+  border-bottom: var(--rule-thin-border);
+}
+
+.article-outside-topics {
+  background-color: var(--outside-tint);
+  padding: 1rem;
+  border: var(--rule-thin-border);
+}
+
+.article-kicker-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+  margin-bottom: 0.35rem;
+  font-family: var(--font-ui);
+  font-size: var(--scale-meta);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.article-topic-tag {
+  font-weight: 700;
+  color: var(--ink-secondary);
+}
+
+.badge-outside-topics,
+.badge-followup,
+.badge-reserve,
+.badge-mention-count {
+  border: var(--rule-thin-border);
+  padding: 0.1rem 0.4rem;
+  font-weight: 600;
+  background-color: var(--bg-elevated);
+}
+
+.badge-mention-count {
+  font-weight: 700;
+  color: var(--ink-primary);
+}
+
+.article-headline {
+  font-family: var(--font-headline);
+  margin: 0.2rem 0 0.45rem;
+  line-height: 1.18;
+  font-weight: 700;
+}
+
+.headline-lead {
+  font-size: var(--scale-lead-headline);
+}
+
+.headline-feature {
+  font-size: var(--scale-feature-headline);
+}
+
+.headline-secondary {
+  font-size: var(--scale-secondary-headline);
+}
+
+.headline-brief {
+  font-size: var(--scale-brief-headline);
+}
+
+.article-deck {
+  font-style: italic;
+  font-size: var(--scale-deck);
+  color: var(--ink-secondary);
+  margin: 0 0 0.55rem;
+}
+
+.article-byline-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  border-top: var(--rule-thin-border);
+  border-bottom: var(--rule-thin-border);
+  padding: 0.3rem 0;
+  margin-bottom: 0.75rem;
+  font-family: var(--font-ui);
+  font-size: var(--scale-meta);
+}
+
+/* Drop Cap Strictly on Lead & Feature Stories (Spec §5) */
+.has-drop-cap > p:first-of-type::first-letter {
+  float: left;
+  font-family: var(--font-headline);
+  font-size: 3.1rem;
+  line-height: 0.85;
+  padding-right: 0.45rem;
+  padding-top: 0.15rem;
+  font-weight: 700;
+}
+
+.article-illustration-figure {
+  margin: 0 0 0.85rem;
+  border: var(--rule-thin-border);
+  padding: 0.45rem;
+  background-color: var(--bg-elevated);
+  text-align: center;
+}
+
+.article-illustration-img {
+  width: 100%;
+  max-height: 360px;
+  object-fit: contain;
+  background-color: #141413;
+  display: block;
+  margin: 0 auto;
+  filter: contrast(1.06) brightness(0.99);
+}
+
+.slot-kind-brief .article-illustration-img,
+.slot-kind-secondary .article-illustration-img {
+  max-height: 280px;
+}
+
+.article-illustration-caption {
+  margin-top: 0.4rem;
+  font-size: var(--scale-caption);
+  font-style: italic;
+  color: var(--ink-secondary);
+  text-align: left;
+}
+
+/* Semantic Fact-Check Colours (Green = Verified, Red = Corrected/Removed ONLY — Spec §5) */
+.verified-accent,
+.verified-badge,
+.verdict-pill-verified {
+  color: var(--verified-fg);
+  background-color: var(--verified-bg);
+}
+
+.corrected-inline-indicator,
+.verdict-pill-corrected,
+.verdict-pill-removed {
+  color: var(--corrected-removed-fg);
+  background-color: var(--corrected-removed-bg);
+}
+
+.verdict-pill {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  border-radius: 2px;
+  margin-right: 0.35rem;
+}
+
+.article-claim-drawer {
+  margin-top: 0.6rem;
+  background-color: var(--bg-elevated);
+  border: var(--rule-thin-border);
+  padding: 0.45rem 0.65rem;
+  font-family: var(--font-ui);
+  font-size: var(--scale-caption);
+}
+
+.claim-drawer-summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.claim-audit-list {
+  margin: 0.5rem 0 0;
+  padding-left: 1rem;
+}
+
+.claim-audit-item {
+  margin-bottom: 0.45rem;
+}
+
+.claim-note-line {
+  color: var(--corrected-removed-fg);
+  font-style: italic;
+  margin-top: 0.15rem;
+}
+
+/* Corrections Box & Page Footer */
+.newspaper-corrections-box,
+.weekly-sources-ledger,
+.edition-notices-banner {
+  margin-top: 1.25rem;
+  padding: 0.85rem 1rem;
+  border: var(--rule-heavy-border);
+  background-color: var(--bg-elevated);
+}
+
+.corrections-box-title,
+.sources-ledger-title {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-headline);
+  font-size: 1.1rem;
+}
+
+.newspaper-page-footer {
+  margin-top: 1.5rem;
+  padding-top: 0.5rem;
+  border-top: var(--rule-heavy-border);
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-ui);
+  font-size: var(--scale-meta);
+  color: var(--ink-muted);
+}
+
+/* Phone-Sized Responsive Reflow on Screen Only (SC-009, Decision #14: never collapse PDF/print grids) */
+@media screen and (max-width: 768px) {
+  .masthead-top-bar {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  .front-page-grid,
+  .inside-page-grid,
+  .section-page-grid,
+  .closing-page-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .front-col-wing,
+  .front-col-centrepiece,
+  .front-col-bulletin-main,
+  .front-col-bulletin-side,
+  .section-col-main,
+  .section-col-side,
+  .slot-primary-lead,
+  .front-page-grid .grid-slot:not(.slot-primary-lead),
+  .inside-page-grid .grid-slot,
+  .section-page-grid .slot-feature,
+  .section-page-grid .slot-brief {
+    grid-column: span 1 !important;
+    border-left: none;
+    border-right: none;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .slot-centrepiece-lead .article-body,
+  .slot-centrepiece-sub .article-body,
+  .newspaper-article.layout-horizontal .article-body {
+    column-count: 1;
+  }
+  .house-ad-layout-horizontal .house-ad-body,
+  .comic-layout-horizontal .comic-body-row {
+    flex-direction: column;
+  }
+  .newspaper-page {
+    padding: 1rem;
+  }
+}
+
+/* Authentic Broadsheet House Advertisement Component ("The Muse Newz") */
+.house-ad-box {
+  background-color: var(--bg-paper);
+  border: 3px double var(--ink-primary);
+  padding: 0.35rem;
+  margin: 0.75rem 0;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.house-ad-inner-border {
+  border: 1px solid var(--ink-secondary);
+  padding: 0.85rem;
+  background-color: var(--bg-elevated);
+}
+
+.house-ad-header {
+  border-bottom: var(--rule-thin-border);
+  padding-bottom: 0.45rem;
+  margin-bottom: 0.65rem;
+}
+
+.house-ad-eyebrow {
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-secondary);
+  margin-bottom: 0.2rem;
+}
+
+.house-ad-title {
+  font-family: var(--font-masthead);
+  font-size: 1.55rem;
+  font-weight: 400;
+  line-height: 1.1;
+  margin: 0.15rem 0;
+  letter-spacing: 0.04em;
+  color: var(--ink-primary);
+}
+
+.house-ad-tagline {
+  font-family: var(--font-headline);
+  font-size: 0.82rem;
+  font-style: italic;
+  color: var(--ink-muted);
+  margin: 0.15rem 0 0;
+}
+
+.house-ad-image-frame {
+  margin: 0.5rem auto 0.65rem;
+  border: var(--rule-thin-border);
+  background-color: #141413;
+  padding: 2px;
+  line-height: 0;
+}
+
+.house-ad-image {
+  width: 100%;
+  max-height: 280px;
+  object-fit: contain;
+  background-color: #141413;
+  display: block;
+  margin: 0 auto;
+  filter: contrast(1.06) brightness(0.99);
+}
+
+.house-ad-image-caption {
+  font-family: var(--font-ui);
+  font-size: 0.64rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  padding: 0.25rem 0.2rem 0;
+  line-height: 1.2;
+}
+
+.house-ad-headline {
+  font-family: var(--font-headline);
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0.5rem 0 0.35rem;
+  color: var(--ink-primary);
+}
+
+.house-ad-copy {
+  font-family: var(--font-body);
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--ink-primary);
+  margin: 0.25rem 0 0.65rem;
+  text-align: justify;
+}
+
+.house-ad-motto-row {
+  margin: 0.5rem 0;
+}
+
+.house-ad-motto-badge {
+  display: inline-block;
+  border-top: 1px dashed var(--ink-secondary);
+  border-bottom: 1px dashed var(--ink-secondary);
+  padding: 0.25rem 0.6rem;
+  font-family: var(--font-ui);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-secondary);
+}
+
+.house-ad-footer {
+  border-top: var(--rule-thin-border);
+  padding-top: 0.4rem;
+  margin-top: 0.65rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+/* Horizontal Layout for Full-Width Page Sections */
+.house-ad-layout-horizontal .house-ad-body {
+  display: flex;
+  flex-direction: row;
+  gap: 1.25rem;
+  align-items: center;
+  text-align: left;
+}
+
+.house-ad-layout-horizontal .house-ad-image-frame {
+  flex: 0 0 240px;
+  max-width: 240px;
+  margin: 0;
+}
+
+.house-ad-layout-horizontal .house-ad-content-block {
+  flex: 1;
+}
+
+.house-ad-layout-horizontal .house-ad-copy {
+  text-align: left;
+}
+
+/* Slot Placements in Page Grids */
+.section-page-grid .slot-house-ad {
+  grid-column: span 4;
+  margin-top: 1rem;
+}
+
+.front-page-grid .slot-house-ad {
+  grid-column: span 4;
+  margin-top: 1rem;
+}
+
+.inside-page-grid .slot-house-ad {
+  margin-top: 1rem;
+}
+
+/* Authentic Broadsheet Satirical Comic Strip Component */
+.newspaper-comic-box {
+  background-color: var(--bg-paper);
+  border: 3px double var(--ink-primary);
+  padding: 0.35rem;
+  margin: 0.85rem 0;
+  box-sizing: border-box;
+}
+
+.comic-inner-frame {
+  border: 1px solid var(--ink-secondary);
+  padding: 0.75rem;
+  background-color: var(--bg-elevated);
+}
+
+.comic-header {
+  border-bottom: var(--rule-thin-border);
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.55rem;
+  text-align: center;
+}
+
+.comic-banner {
+  font-family: var(--font-masthead);
+  font-size: 1.4rem;
+  line-height: 1.1;
+  color: var(--ink-primary);
+  letter-spacing: 0.05em;
+}
+
+.comic-subtitle {
+  font-family: var(--font-ui);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-secondary);
+  margin-top: 0.15rem;
+}
+
+.comic-image-frame {
+  margin: 0.4rem auto;
+  border: var(--rule-thin-border);
+  background: #141413;
+  padding: 2px;
+  line-height: 0;
+}
+
+.comic-image {
+  width: 100%;
+  max-height: 290px;
+  object-fit: contain;
+  background-color: #141413;
+  display: block;
+  margin: 0 auto;
+  filter: contrast(1.08) brightness(0.98);
+}
+
+.comic-caption-box {
+  margin-top: 0.55rem;
+}
+
+.comic-dialogue {
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--ink-primary);
+  margin: 0 0 0.5rem;
+  text-align: left;
+}
+
+.comic-footer-signoff {
+  border-top: var(--rule-thin-border);
+  padding-top: 0.35rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-ui);
+  font-size: 0.6rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+/* Horizontal Comic Layout for Wide / Banner Slots (Decision #14) */
+.comic-layout-horizontal .comic-body-row {
+  display: flex;
+  flex-direction: row;
+  gap: 1.15rem;
+  align-items: center;
+}
+
+.comic-layout-horizontal .comic-image-frame {
+  flex: 0 0 245px;
+  max-width: 245px;
+  margin: 0;
+}
+
+.comic-layout-horizontal .comic-caption-box {
+  flex: 1;
+  margin-top: 0;
+}
+
+/* Broadsheet Newsroom Curiosities, Classifieds & Jokes Component */
+.newspaper-curiosities-box {
+  background-color: var(--bg-paper);
+  border: 2px solid var(--ink-primary);
+  padding: 0.3rem;
+  margin: 0.85rem 0;
+  box-sizing: border-box;
+}
+
+.curiosities-inner-frame {
+  border: 1px dashed var(--ink-secondary);
+  padding: 0.75rem;
+  background-color: var(--bg-elevated);
+}
+
+.curiosities-header {
+  border-bottom: var(--rule-thin-border);
+  padding-bottom: 0.35rem;
+  margin-bottom: 0.6rem;
+  text-align: center;
+}
+
+.curiosities-eyebrow {
+  font-family: var(--font-ui);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.curiosities-title {
+  font-family: var(--font-headline);
+  font-size: 1.15rem;
+  margin: 0.2rem 0 0;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.curiosities-entry {
+  margin-bottom: 0.65rem;
+}
+
+.curiosities-label {
+  font-family: var(--font-ui);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--ink-secondary);
+  text-transform: uppercase;
+  margin-bottom: 0.2rem;
+}
+
+.curiosities-text {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  margin: 0.15rem 0;
+  color: var(--ink-primary);
+}
+
+.curiosities-footer {
+  border-top: var(--rule-thin-border);
+  padding-top: 0.35rem;
+  margin-top: 0.4rem;
+  text-align: center;
+  font-family: var(--font-ui);
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+/* Grid Slot Placements for Comic & Curiosities */
+.front-page-grid .slot-filler {
+  grid-column: span 4;
+  margin-top: 0.85rem;
+}
+
+.section-page-grid .slot-filler {
+  grid-column: span 4;
+  margin-top: 0.85rem;
+}
+
+.inside-page-grid .slot-filler {
+  margin-top: 0.85rem;
+}
+
+/* Print One Page Per Sheet with UI Chrome Hidden & Full Broadsheet Grid Alignment Preserved (FR-030, SC-009, Decision #14) */
+@page {
+  size: A4 portrait;
+  margin: 0.32in;
+}
+
+@media print {
+  .no-print,
+  .app-toolbar,
+  .app-drawer,
+  .btn-tts {
+    display: none !important;
+  }
+  body {
+    background: #FFFFFF !important;
+    color: #141413 !important;
+    font-size: 9.5pt;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .newspaper-edition-container {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .newspaper-page {
+    border: 1px solid #141413;
+    margin: 0 0 0.2in 0;
+    padding: 0.28in;
+    break-after: page;
+    page-break-after: always;
+  }
+  .newspaper-page:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+  .front-page-grid,
+  .inside-page-grid,
+  .section-page-grid,
+  .closing-page-grid {
+    display: grid !important;
+    grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+    gap: 0.85rem !important;
+  }
+  .house-ad-box,
+  .newspaper-comic-box,
+  .newspaper-curiosities-box,
+  .article-illustration-figure {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

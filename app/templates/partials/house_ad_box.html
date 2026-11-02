@@ -1,0 +1,96 @@
+<!-- Partial: House Advertisement Box for "The Muse Newz" -->
+{% set variant = (filler and filler.variant_key) or ad_variant | default("owl") %}
+{% set raw_layout = ad_layout | default((filler and filler.layout_orientation) or "stacked") %}
+{% set layout = "horizontal" if raw_layout == "horizontal" else "stacked" %}
+
+<aside class="house-ad-box house-ad-layout-{{ layout }} layout-{{ raw_layout }} house-ad-variant-{{ variant }}" data-testid="house-ad-box" role="complementary" aria-label="House Advertisement for The Muse Newz">
+  <div class="house-ad-inner-border">
+    <header class="house-ad-header">
+      <div class="house-ad-eyebrow">
+        {% if filler and filler.subtitle_or_eyebrow %}
+          {{ filler.subtitle_or_eyebrow }}
+        {% elif variant == "press" %}
+          A Constitutional Dispatch from the Editorial Desk
+        {% elif variant == "pocket" %}
+          Paced for the Commute &amp; the Quiet Fireside
+        {% else %}
+          The Sovereign Fact-Checker’s Emblem
+        {% endif %}
+      </div>
+      <h3 class="house-ad-title">{{ (filler and filler.title) or "THE MUSE NEWZ" }}</h3>
+      <p class="house-ad-tagline">
+        {% if filler and filler.comic_dialogue_speaker %}
+          {{ filler.comic_dialogue_speaker }}
+        {% elif variant == "press" %}
+          The Morning Dispatch Edition · Est. 2026
+        {% elif variant == "pocket" %}
+          A Three-Minute Morning Ritual · Paced to Your Rhythm
+        {% else %}
+          Audited Knowledge · Verified by Adversarial Agents
+        {% endif %}
+      </p>
+    </header>
+
+    <div class="house-ad-body">
+      <div class="house-ad-image-frame">
+        <img
+          src="{{ (filler and (filler.image_data_uri or filler.image_path)) or ('/static/images/ads/ad_muse_brief_' ~ variant ~ '.png') }}"
+          data-image-path="{{ (filler and filler.image_path) or ('/static/images/ads/ad_muse_brief_' ~ variant ~ '.png') }}"
+          alt="The Muse Newz Broadside Illustration"
+          class="house-ad-image"
+          loading="lazy"
+        />
+        <div class="house-ad-image-caption">
+          {% if variant == "press" %}
+            Plate I: Gutenberg Screw Press &amp; Typesetter’s Composing Stick
+          {% elif variant == "pocket" %}
+            Plate II: The Pocket Chronometer &amp; Folded Morning Folio
+          {% else %}
+            Plate III: The Athena Owl of Epistemic Vigilance
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="house-ad-content-block">
+        <h4 class="house-ad-headline">
+          {% if variant == "press" %}
+            Printed Before Sunrise on Warm Newsprint
+          {% elif variant == "pocket" %}
+            Verification-First Reading Sized to Your Rhythm
+          {% else %}
+            Where Conventional Engines Invent, The Muse Verifies
+          {% endif %}
+        </h4>
+        <p class="house-ad-copy">
+          {% if filler and filler.dialogue_or_copy %}
+            {{ filler.dialogue_or_copy }}
+          {% elif variant == "press" %}
+            Every factual assertion across your personal edition has been audited by autonomous adversarial fact-checkers against primary source repositories before ink meets paper. Zero hallucinated claims. Savor the day’s essential truths in three unhurried minutes.
+          {% elif variant == "pocket" %}
+            Structured to honor human attention without endless algorithmic feeds or speculative clickbait. Configured to your exact delivery schedule, whether a brisk four-hour dispatch, a two-page daily, or a deep seven-page weekly folio.
+          {% else %}
+            Every published statement is anchored to cross-referenced primary documents. From deep-sea biology to orbital telecommunication networks, read with calm certainty. Delivered unconditionally to your chosen cadence.
+          {% endif %}
+        </p>
+        <div class="house-ad-motto-row">
+          <span class="house-ad-motto-badge">
+            {% if filler and filler.caption_or_motto %}
+              {{ filler.caption_or_motto }}
+            {% elif variant == "press" %}
+              ★ VERIFICATION-FIRST · ZERO CITATION LAUNDERING ★
+            {% elif variant == "pocket" %}
+              ★ FORMATTED FOR FOCUS · NO ENDLESS FEEDS ★
+            {% else %}
+              ★ CONSTITUTIONAL INTEGRITY · PROVENANCE PRESERVED ★
+            {% endif %}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <footer class="house-ad-footer">
+      <span>THE DAILY MUSE · PROPRIETARY BROADSHEET DISPATCH</span>
+      <span>CONFIGURE RHYTHM IN SETTINGS</span>
+    </footer>
+  </div>
+</aside>

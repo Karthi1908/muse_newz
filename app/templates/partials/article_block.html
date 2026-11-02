@@ -1,0 +1,95 @@
+<!-- Shared Partial: Article Furniture & Expandable Per-Claim Audit Detail (Spec §5, FR-027..032) -->
+<article class="newspaper-article slot-kind-{{ article.slot_kind }} layout-{{ article.layout_orientation or 'vertical' }} {% if article.outside_flag %}article-outside-topics{% endif %}" id="art-{{ article.slot_id }}">
+  <div class="article-kicker-row">
+    <span class="article-topic-tag">{{ article.topic }}</span>
+    {% if article.mention_count and article.mention_count > 1 %}
+      <span class="badge-mention-count" data-testid="mention-count-badge">★ {{ article.mention_count }} Sources Reporting</span>
+    {% endif %}
+    {% if article.outside_flag %}
+      <span class="badge-outside-topics" data-testid="outside-topics-badge">Outside Your Usual Reading</span>
+    {% endif %}
+    {% if article.follow_up_flag %}
+      <span class="badge-followup" data-testid="followup-badge">Follow-up</span>
+    {% endif %}
+    {% if article.substituted_from_reserve %}
+      <span class="badge-reserve">Reserve Substitution</span>
+    {% endif %}
+  </div>
+
+  <h2 class="article-headline headline-{{ article.slot_kind }}">{{ article.headline }}</h2>
+
+  {% if article.deck %}
+    <p class="article-deck">{{ article.deck }}</p>
+  {% endif %}
+
+  <div class="article-byline-row">
+    <span class="article-byline">{{ article.byline }}</span>
+    <span class="article-factcheck-badge verified-badge">
+      ✓ {{ article.verified_claims_count }} Verified Claims
+      {% if article.corrected_claims_count > 0 or article.removed_claims_count > 0 %}
+        <span class="corrected-inline-indicator">
+          ({{ article.corrected_claims_count }} corrected, {{ article.removed_claims_count }} removed)
+        </span>
+      {% endif %}
+    </span>
+    <button type="button" class="btn-tts no-print" onclick="window.DailyMuseTTS && window.DailyMuseTTS.speakArticle('art-{{ article.slot_id }}')" title="Listen to article">
+      🔊 Listen
+    </button>
+  </div>
+
+  {% if article.outside_flag and article.outside_note %}
+    <aside class="outside-topics-note">
+      <strong>Why This Story Is Here:</strong> {{ article.outside_note }}
+    </aside>
+  {% endif %}
+
+  {% if article.image_data_uri or article.image_path %}
+    <figure class="article-illustration-figure">
+      <img src="{{ article.image_data_uri or article.image_path }}" data-image-path="{{ article.image_path or '' }}" alt="{{ article.image_caption or 'Editorial illustration' }}" class="article-illustration-img" loading="lazy" />
+      <figcaption class="article-illustration-caption">
+        {{ article.image_caption }}
+      </figcaption>
+    </figure>
+  {% endif %}
+
+  <div class="article-body {% if article.slot_kind in ['lead', 'feature'] %}has-drop-cap{% endif %}">
+    {% for para in article.body_paragraphs %}
+      <p>{{ para }}</p>
+    {% endfor %}
+  </div>
+
+  <footer class="article-footer">
+    <div class="article-sources-line">
+      <strong>Cited Sources:</strong>
+      {% for src in article.sources %}
+        <a href="{{ src.url }}" target="_blank" rel="noopener noreferrer" class="source-link">
+          [{{ src.source_id }}] {{ src.source_name }} ({{ src.published_date }})
+        </a>{% if not loop.last %} · {% endif %}
+      {% endfor %}
+    </div>
+
+    <details class="article-claim-drawer">
+      <summary class="claim-drawer-summary">
+        Inspect Fact-Check Audit ({{ article.claims|length }} Claims Checked)
+      </summary>
+      <ul class="claim-audit-list">
+        {% for claim in article.claims %}
+          <li class="claim-audit-item verdict-{{ claim.verdict }}">
+            <div class="claim-verdict-line">
+              <span class="verdict-pill verdict-pill-{{ claim.verdict }}">{{ claim.verdict|upper }}</span>
+              <span class="claim-text">{{ claim.claim_text }}</span>
+            </div>
+            {% if claim.source_url %}
+              <div class="claim-source-line">
+                Source: <a href="{{ claim.source_url }}" target="_blank" rel="noopener noreferrer">{{ claim.source_id or 'Primary Source' }} ({{ claim.source_url }})</a>
+              </div>
+            {% endif %}
+            {% if claim.note %}
+              <div class="claim-note-line">{{ claim.note }}</div>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </details>
+  </footer>
+</article>

@@ -1,0 +1,50 @@
+{
+  "slot_id": "p1_lead",
+  "iteration": 2,
+  "headline": "Parallel Verification Loops Cut Error Rates to 1.1%",
+  "deck": "Benchmark across 2,400 workflows shows 38% latency reduction.",
+  "byline": "By Your Daily Muse AI Desk",
+  "body_paragraphs": [
+    "A consortium of 14 distributed systems laboratories published the Autumn 2026 Agentic Reliability Benchmark on October 30, 2026 [S1].",
+    "Executing topic research agents in parallel and enforcing a two-round writer and fact-checker loop reduced unsupported factual claims from 14.6% down to 1.1% [S1].",
+    "End-to-end pipeline latency dropped by 38% compared to sequential agent chains [S1].",
+    "Unverified rumor claims latency dropped by 999% on Mars [S1]."
+  ],
+  "illustration_prompt": "Editorial woodcut of parallel computing nodes",
+  "claims": [
+    {
+      "claim_id": "c1",
+      "claim_text": "14 distributed systems laboratories published the Autumn 2026 Benchmark on October 30, 2026.",
+      "original_sentence": "A consortium of 14 distributed systems laboratories published the Autumn 2026 Agentic Reliability Benchmark on October 30, 2026 [S1].",
+      "verdict": "verified",
+      "source_id": "S1",
+      "source_url": "https://ai-systems-journal.example.org/2026/10/parallel-verification-loops-benchmark"
+    },
+    {
+      "claim_id": "c2",
+      "claim_text": "Unsupported factual claims fell from 14.6% down to 1.1%.",
+      "original_sentence": "Executing topic research agents in parallel and enforcing a two-round writer and fact-checker loop reduced unsupported factual claims from 14.6% down to 1.1% [S1].",
+      "verdict": "verified",
+      "source_id": "S1",
+      "source_url": "https://ai-systems-journal.example.org/2026/10/parallel-verification-loops-benchmark"
+    },
+    {
+      "claim_id": "c3",
+      "claim_text": "End-to-end pipeline latency dropped by 38%.",
+      "original_sentence": "End-to-end pipeline latency dropped by 38% compared to sequential agent chains [S1].",
+      "verdict": "verified",
+      "source_id": "S1",
+      "source_url": "https://ai-systems-journal.example.org/2026/10/parallel-verification-loops-benchmark"
+    },
+    {
+      "claim_id": "c_poison",
+      "claim_text": "Latency dropped by 999% on Mars.",
+      "original_sentence": "Unverified rumor claims latency dropped by 999% on Mars [S1].",
+      "verdict": "removed",
+      "source_id": "S1",
+      "source_url": "https://ai-systems-journal.example.org/2026/10/parallel-verification-loops-benchmark",
+      "note": "Removed after Round 2: '999% on Mars' is unsupported by cited source [S1]."
+    }
+  ],
+  "all_supported": false
+}

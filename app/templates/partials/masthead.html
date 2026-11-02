@@ -1,0 +1,43 @@
+<!-- Shared Partial: Fixed Masthead (Page 1 of Bulletin, Daily, and Weekly — Spec §5, FR-029) -->
+<header class="newspaper-masthead" role="banner">
+  <div class="masthead-top-bar">
+    <div class="masthead-ear masthead-ear-left">
+      <span class="ear-label">READER EDITION FOR</span>
+      <strong class="ear-value">{{ edition.display_reader_name }}</strong>
+      <span class="ear-sub">Format: {{ edition.format_label }} · Region: <span data-testid="masthead-geo-ear">{{ edition.geographic_preference or 'Global' }}</span></span>
+    </div>
+
+    <div class="masthead-title-block">
+      <h1 class="masthead-blackletter" data-testid="masthead-title">{{ edition.publication_title }}</h1>
+      <p class="masthead-motto" data-testid="masthead-tagline">{{ edition.publication_tagline }}</p>
+    </div>
+
+    <div class="masthead-ear masthead-ear-right" data-testid="masthead-verification-totals">
+      <span class="ear-label">EDITION VERIFICATION LEDGER</span>
+      <strong class="ear-value verified-accent">
+        {{ edition.total_claims_verified }} / {{ edition.total_claims_checked }} Claims Verified
+      </strong>
+      <span class="ear-sub">
+        {% if edition.corrections_box|length > 0 %}
+          {{ edition.corrections_box|length }} Corrected or Removed
+        {% else %}
+          Zero Unverified Claims
+        {% endif %}
+      </span>
+    </div>
+  </div>
+
+  <div class="masthead-edition-line">
+    <span class="edition-meta-item"><strong>No. {{ edition.edition_number }}</strong></span>
+    <span class="edition-meta-sep">•</span>
+    <span class="edition-meta-item">{{ edition.published_at.strftime('%A, %B %d, %Y — %H:%M UTC') }}</span>
+    <span class="edition-meta-sep">•</span>
+    <span class="edition-meta-item format-pill">{{ edition.format_label }} Edition</span>
+    <span class="edition-meta-sep">•</span>
+    <span class="edition-meta-item">Reader: {{ edition.display_reader_name }}</span>
+    <span class="edition-meta-sep">•</span>
+    <span class="edition-meta-item" data-testid="masthead-geo-line">Region: {{ edition.geographic_preference or 'Global' }}</span>
+    <span class="edition-meta-sep">•</span>
+    <span class="edition-meta-item">Page {{ page.page_number }} of {{ edition.total_pages }}</span>
+  </div>
+</header>

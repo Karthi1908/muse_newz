@@ -1,0 +1,47 @@
+<!-- Partial: Newsroom Curiosities, Classifieds & Broadsheet Jokes -->
+<aside class="newspaper-curiosities-box" data-testid="curiosities-box" role="complementary" aria-label="Broadsheet Curiosities, Classifieds and Wit">
+  <div class="curiosities-inner-frame">
+    <header class="curiosities-header">
+      <div class="curiosities-eyebrow">{{ (filler and filler.subtitle_or_eyebrow) or "A Compendium of Wit, Curiosities &amp; Epigrams" }}</div>
+      <h4 class="curiosities-title">{{ (filler and filler.title) or "THE NEWSROOM DISPATCHES" }}</h4>
+    </header>
+
+    {% if filler and filler.dialogue_or_copy %}
+      <div class="curiosities-entry">
+        <p class="curiosities-text">
+          {{ filler.dialogue_or_copy | replace("\n", "<br/>") | safe }}
+        </p>
+      </div>
+    {% else %}
+      <div class="curiosities-entry">
+        <div class="curiosities-label">★ THE FACT-CHECKER’S PARABLE ★</div>
+        <p class="curiosities-text">
+          An LLM, a strict compiler, and an adversarial fact-checker walk into a public house. 
+          The LLM instantly orders four thousand pints. The compiler rejects the request for improper schema formatting. 
+          The fact-checker inspects the bar’s tax records and proves nobody entered the room at all.
+        </p>
+      </div>
+
+      <div class="curiosities-entry">
+        <div class="curiosities-label">★ CLASSIFIED NOTICES ★</div>
+        <p class="curiosities-text">
+          <strong>LOST &amp; FOUND:</strong> One speculative adjective. Last seen wandering between Paragraph 2 and the Sources Index. Generous reward of zero tokens if returned to the Desk.
+        </p>
+        <p class="curiosities-text">
+          <strong>SITUATION WANTED:</strong> Sturdy carrier pigeon skilled in 256-bit post-quantum lattice encryption. Seeks employment routing dispatches across the channel when satellites nap.
+        </p>
+      </div>
+
+      <div class="curiosities-entry">
+        <div class="curiosities-label">★ DR. BABBAGE’S REMEDY ★</div>
+        <p class="curiosities-text">
+          <em>Patent Elixir of Algorithmic Temperance:</em> Guaranteed to relieve sudden context drift, phantom citations, and late-night hallucination fever. Prepared fresh before sunrise.
+        </p>
+      </div>
+    {% endif %}
+
+    <footer class="curiosities-footer">
+      <span>{{ (filler and filler.caption_or_motto) or "THE DAILY MUSE · DEPARTMENT OF MORAL PHILOSOPHY" }}</span>
+    </footer>
+  </div>
+</aside>

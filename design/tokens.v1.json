@@ -1,0 +1,58 @@
+{
+  "design_version": "1.0.0",
+  "publication_title": "Your Daily Muse",
+  "typography": {
+    "font_masthead": "'UnifrakturMaguntia', 'Old English Text MT', 'Engravers Old English BT', Georgia, serif",
+    "font_headline": "'Playfair Display', 'Times New Roman', Georgia, serif",
+    "font_body": "'Source Serif 4', 'Charter', Georgia, serif",
+    "font_ui": "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+    "font_mono": "'JetBrains Mono', 'Courier New', monospace",
+    "scale": {
+      "masthead": "clamp(2.6rem, 5vw, 4.25rem)",
+      "lead_headline": "2.15rem",
+      "feature_headline": "1.75rem",
+      "secondary_headline": "1.35rem",
+      "brief_headline": "1.1rem",
+      "deck": "1.02rem",
+      "body": "0.98rem",
+      "caption": "0.82rem",
+      "meta": "0.75rem"
+    }
+  },
+  "palette_light": {
+    "bg_paper": "#F7F3E8",
+    "bg_elevated": "#EFEAD8",
+    "ink_primary": "#141413",
+    "ink_secondary": "#3D3A36",
+    "ink_muted": "#66615B",
+    "rule_heavy": "#141413",
+    "rule_light": "#BFB8A8",
+    "outside_tint": "#EDE5CE"
+  },
+  "palette_dark": {
+    "bg_paper": "#161615",
+    "bg_elevated": "#201F1D",
+    "ink_primary": "#EDE8DC",
+    "ink_secondary": "#C7C1B4",
+    "ink_muted": "#8F897D",
+    "rule_heavy": "#EDE8DC",
+    "rule_light": "#3B3935",
+    "outside_tint": "#25221B"
+  },
+  "verification_semantic": {
+    "verified_fg": "#1B5E20",
+    "verified_bg": "#E8F5E9",
+    "verified_fg_dark": "#81C784",
+    "verified_bg_dark": "#142916",
+    "corrected_removed_fg": "#B71C1C",
+    "corrected_removed_bg": "#FFEBEE",
+    "corrected_removed_fg_dark": "#E57373",
+    "corrected_removed_bg_dark": "#2D1414"
+  },
+  "grid": {
+    "max_width": "1240px",
+    "column_gap": "1.5rem",
+    "rule_heavy_weight": "3px double",
+    "rule_thin_weight": "1px solid"
+  }
+}

@@ -1,0 +1,11 @@
+<!-- Shared Partial: Inside/Section/Closing Running Header & Folio (Spec §5, FR-030) -->
+<header class="newspaper-running-header">
+  <div class="running-header-row">
+    <span class="running-pub-title" data-testid="running-pub-title">{{ edition.publication_title }}</span>
+    <span class="running-section-flag">{{ page.section_flag }}</span>
+    <span class="running-date-edition">
+      {{ edition.published_at.strftime('%b %d, %Y') }} · No. {{ edition.edition_number }} ({{ edition.format_label }})
+    </span>
+    <span class="running-folio" data-testid="page-folio">Page {{ page.page_number }} of {{ edition.total_pages }}</span>
+  </div>
+</header>

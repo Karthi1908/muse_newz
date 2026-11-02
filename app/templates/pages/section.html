@@ -1,0 +1,62 @@
+<!-- Page Template: Weekly Topic Section Page -->
+<section class="newspaper-page page-template-section" data-page-number="{{ page.page_number }}">
+  {% include "partials/running_header.html" %}
+
+  <div class="section-page-banner">
+    <h2 class="section-page-heading">{{ page.section_flag }}</h2>
+  </div>
+
+  <div class="section-page-grid" style="display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--grid-column-gap); align-items: stretch;">
+    <div class="section-col-main" style="grid-column: span 7; display: flex; flex-direction: column; gap: 1.15rem; border-right: var(--rule-thin-border); padding-right: 1.25rem;">
+      {% if page.articles|length > 0 %}
+        {% set article = page.articles[0] %}
+        <div class="grid-slot slot-{{ article.slot_kind }}">
+          {% include "partials/article_block.html" %}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="section-col-side" style="grid-column: span 5; display: flex; flex-direction: column; gap: 1.15rem;">
+      {% for article in page.articles[1:] %}
+        <div class="grid-slot slot-{{ article.slot_kind }}">
+          {% include "partials/article_block.html" %}
+        </div>
+      {% endfor %}
+
+      <!-- Section Page Right-Column Whitespace Fillers (Rotating Ads, Comics, and Newsroom Wit) -->
+      {% if page.whitespace_fillers and page.whitespace_fillers|length > 0 %}
+        {% for filler in page.whitespace_fillers %}
+          <div class="grid-slot slot-filler slot-ad-section {% if loop.last %}slot-filler-grow{% endif %}">
+            {% if filler.filler_type == "comic_joke" %}
+              {% include "partials/comic_strip_box.html" %}
+            {% elif filler.filler_type == "muse_brief_ad" %}
+              {% include "partials/house_ad_box.html" %}
+            {% else %}
+              {% include "partials/curiosities_box.html" %}
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="grid-slot slot-filler slot-ad-section slot-filler-grow">
+          {% if page.page_number % 3 == 0 %}
+            {% with comic_variant="trap" %}
+              {% include "partials/comic_strip_box.html" %}
+            {% endwith %}
+          {% elif page.page_number % 3 == 1 %}
+            {% include "partials/curiosities_box.html" %}
+          {% else %}
+            {% with ad_variant="press" %}
+              {% include "partials/house_ad_box.html" %}
+            {% endwith %}
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <footer class="newspaper-page-footer">
+    <span>{{ edition.publication_title }} · Edition No. {{ edition.edition_number }} ({{ edition.format_label }})</span>
+    <span class="design-version-stamp" data-testid="design-version-footer">Design Identity v{{ edition.design_version }}</span>
+    <span>Page {{ page.page_number }} of {{ edition.total_pages }}</span>
+  </footer>
+</section>

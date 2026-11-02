@@ -1,0 +1,28 @@
+<!-- Shared Partial: Edition Corrections & Removals Ledger (Spec §5, Story 2, FR-031, SC-003) -->
+<section class="newspaper-corrections-box" data-testid="edition-corrections-box">
+  <h3 class="corrections-box-title">Newsroom Verification &amp; Corrections Box</h3>
+  <p class="corrections-box-intro">
+    Every factual claim in <em>Your Daily Muse</em> is cross-examined against primary source text before publication.
+    Claims that could not be verified as originally drafted were revised in Round 2 or stripped by the Gatekeeper:
+  </p>
+  {% if edition.corrections_box and edition.corrections_box|length > 0 %}
+    <ul class="corrections-ledger-list">
+      {% for item in edition.corrections_box %}
+        <li class="corrections-ledger-item">
+          <span class="verdict-pill verdict-pill-{{ item.verdict }}">{{ item.verdict|upper }}</span>
+          <strong>Claim ({{ item.claim_id }}):</strong> {{ item.claim_text }}
+          {% if item.note %}
+            — <em>{{ item.note }}</em>
+          {% endif %}
+          {% if item.source_url %}
+            (<a href="{{ item.source_url }}" target="_blank" rel="noopener noreferrer">Source Link</a>)
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="corrections-none-note">
+      ✓ All {{ edition.total_claims_checked }} factual claims in this edition passed primary-source verification without requiring post-loop removal.
+    </p>
+  {% endif %}
+</section>

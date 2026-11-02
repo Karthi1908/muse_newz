@@ -1,0 +1,65 @@
+<!-- Page Template: Inside Page (Daily Page 2) -->
+<section class="newspaper-page page-template-inside" data-page-number="{{ page.page_number }}">
+  {% include "partials/running_header.html" %}
+
+  <div class="inside-page-grid" style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--grid-column-gap); align-items: stretch;">
+    {% for article in page.articles %}
+      <div class="grid-slot slot-{{ article.slot_kind }} space-{{ article.layout_orientation or 'vertical' }}" style="grid-column: span 4; min-width: 0;">
+        {% include "partials/article_block.html" %}
+      </div>
+    {% endfor %}
+
+    <!-- Inside Page Whitespace Fillers (Comics, Jokes, and House Ads in Vertical or Horizontal Spaces) -->
+    {% if page.whitespace_fillers and page.whitespace_fillers|length > 0 %}
+      {% for filler in page.whitespace_fillers %}
+        {% set span_cols = 6 if (page.articles|length % 3 == 0 and page.whitespace_fillers|length == 2) else (12 if filler.size_tier == 'banner' else 4) %}
+        {% set space_orient = "horizontal" if span_cols >= 6 else "vertical" %}
+        <div class="grid-slot slot-filler slot-filler-{{ filler.size_tier }} space-{{ space_orient }}" style="grid-column: span {{ span_cols }}; min-width: 0;">
+          {% if filler.filler_type == "comic_joke" %}
+            {% with comic_layout = space_orient %}
+              {% include "partials/comic_strip_box.html" %}
+            {% endwith %}
+          {% elif filler.filler_type == "muse_brief_ad" %}
+            {% with ad_layout = "horizontal" if span_cols >= 6 else "stacked" %}
+              {% include "partials/house_ad_box.html" %}
+            {% endwith %}
+          {% else %}
+            {% include "partials/curiosities_box.html" %}
+          {% endif %}
+        </div>
+      {% endfor %}
+    {% else %}
+      {% if page.articles|length % 3 == 1 %}
+        <!-- 1 brief in last row -> 8 columns open -> place Comic (4 cols) + Curiosities (4 cols) -->
+        <div class="grid-slot slot-filler slot-comic-inside" style="grid-column: span 4;">
+          {% with comic_variant="trap" %}
+            {% include "partials/comic_strip_box.html" %}
+          {% endwith %}
+        </div>
+        <div class="grid-slot slot-filler slot-curiosities-inside" style="grid-column: span 4;">
+          {% include "partials/curiosities_box.html" %}
+        </div>
+      {% elif page.articles|length % 3 == 2 %}
+        <!-- 2 briefs in last row -> 4 columns open -> place Curiosities or House Ad -->
+        <div class="grid-slot slot-filler slot-curiosities-inside" style="grid-column: span 4;">
+          {% include "partials/curiosities_box.html" %}
+        </div>
+      {% else %}
+        <!-- Full row -> place horizontal house ad banner before corrections -->
+        <div class="grid-slot slot-filler slot-ad-inside" style="grid-column: span 12;">
+          {% with ad_variant="owl", ad_layout="horizontal" %}
+            {% include "partials/house_ad_box.html" %}
+          {% endwith %}
+        </div>
+      {% endif %}
+    {% endif %}
+  </div>
+
+  {% include "partials/corrections_box.html" %}
+
+  <footer class="newspaper-page-footer">
+    <span>{{ edition.publication_title }} · Edition No. {{ edition.edition_number }} ({{ edition.format_label }})</span>
+    <span class="design-version-stamp" data-testid="design-version-footer">Design Identity v{{ edition.design_version }}</span>
+    <span>Page {{ page.page_number }} of {{ edition.total_pages }}</span>
+  </footer>
+</section>

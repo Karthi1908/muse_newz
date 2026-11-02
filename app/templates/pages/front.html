@@ -1,0 +1,166 @@
+<!-- Page Template: Front Page (Page 1 for Bulletin, Daily, and Weekly) -->
+<section class="newspaper-page page-template-front" data-page-number="{{ page.page_number }}">
+  {% include "partials/masthead.html" %}
+
+  {% if edition.notices and edition.notices|length > 0 and page.page_number == 1 %}
+    <div class="edition-notices-banner" data-testid="edition-notices">
+      <strong>Editorial Desk Notice:</strong>
+      {% for note in edition.notices %}
+        <span>{{ note }}</span>{% if not loop.last %} · {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="front-page-grid format-{{ edition.format_name }}" style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--grid-column-gap); align-items: stretch;">
+    {% if page.articles|length >= 4 %}
+      <!-- 3-Column Broadsheet Front Page: Left Wing (3 cols, Vertical) | Centrepiece Main News (6 cols, Horizontal/Wide) | Right Wing (3 cols, Vertical) -->
+      <div class="front-col-wing front-col-left" style="grid-column: span 3; min-width: 0; display: flex; flex-direction: column; gap: 1.15rem;">
+        {% if page.articles|length > 1 %}
+          {% set article = page.articles[1] %}
+          <div class="grid-slot slot-{{ article.slot_kind }} space-vertical">
+            {% include "partials/article_block.html" %}
+          </div>
+        {% endif %}
+
+        <!-- Left-Wing Whitespace Filler (SAM-3 Balanced Vertical House Ad / Wit) -->
+        <div class="grid-slot slot-filler slot-filler-grow space-vertical">
+          {% if page.whitespace_fillers and page.whitespace_fillers|length > 1 %}
+            {% set filler = page.whitespace_fillers[1] %}
+            {% if filler.filler_type == "comic_joke" %}
+              {% include "partials/comic_strip_box.html" %}
+            {% elif filler.filler_type == "muse_brief_ad" %}
+              {% include "partials/house_ad_box.html" %}
+            {% else %}
+              {% include "partials/curiosities_box.html" %}
+            {% endif %}
+          {% else %}
+            {% with ad_variant="owl" %}
+              {% include "partials/house_ad_box.html" %}
+            {% endwith %}
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Centrepiece Column (6 cols): #1 Most-Mentioned Main News Story + Horizontal Lower Feature / Outside Dispatch -->
+      <div class="front-col-centrepiece" style="grid-column: span 6; min-width: 0; display: flex; flex-direction: column; gap: 1.25rem; border-left: var(--rule-thin-border); border-right: var(--rule-thin-border); padding: 0 1.25rem;">
+        {% set article = page.articles[0] %}
+        <div class="grid-slot slot-{{ article.slot_kind }} slot-primary-lead slot-centrepiece-lead space-horizontal" data-testid="centrepiece-lead-slot">
+          <div class="centrepiece-ribbon">★ FRONT-PAGE CENTREPIECE · MOST-MENTIONED MAIN NEWS ({{ article.mention_count or 1 }} SOURCES) ★</div>
+          {% include "partials/article_block.html" %}
+        </div>
+
+        {% if page.articles|length > 3 %}
+          {% for extra_art in page.articles[3:] %}
+            {% set article = extra_art %}
+            <div class="grid-slot slot-{{ article.slot_kind }} slot-centrepiece-sub space-horizontal">
+              {% include "partials/article_block.html" %}
+            </div>
+          {% endfor %}
+        {% endif %}
+      </div>
+
+      <!-- Right Wing Column (3 cols, Vertical): Secondary Story 2 + Satirical Comic Strip + Newsroom Wit -->
+      <div class="front-col-wing front-col-right" style="grid-column: span 3; min-width: 0; display: flex; flex-direction: column; gap: 1.15rem;">
+        {% if page.articles|length > 2 %}
+          {% set article = page.articles[2] %}
+          <div class="grid-slot slot-{{ article.slot_kind }} space-vertical">
+            {% include "partials/article_block.html" %}
+          </div>
+        {% endif %}
+
+        <div class="grid-slot slot-filler slot-ad-front space-vertical">
+          {% if page.whitespace_fillers and page.whitespace_fillers|length > 0 %}
+            {% set filler = page.whitespace_fillers[0] %}
+            {% if filler.filler_type == "comic_joke" %}
+              {% include "partials/comic_strip_box.html" %}
+            {% elif filler.filler_type == "muse_brief_ad" %}
+              {% include "partials/house_ad_box.html" %}
+            {% else %}
+              {% include "partials/curiosities_box.html" %}
+            {% endif %}
+          {% else %}
+            {% with comic_variant="mechanical" %}
+              {% include "partials/comic_strip_box.html" %}
+            {% endwith %}
+          {% endif %}
+        </div>
+
+        <div class="grid-slot slot-filler slot-filler-grow space-vertical">
+          {% if page.whitespace_fillers and page.whitespace_fillers|length > 2 %}
+            {% set filler = page.whitespace_fillers[2] %}
+            {% if filler.filler_type == "comic_joke" %}
+              {% include "partials/comic_strip_box.html" %}
+            {% elif filler.filler_type == "muse_brief_ad" %}
+              {% include "partials/house_ad_box.html" %}
+            {% else %}
+              {% include "partials/curiosities_box.html" %}
+            {% endif %}
+          {% else %}
+            {% include "partials/curiosities_box.html" %}
+          {% endif %}
+        </div>
+      </div>
+    {% else %}
+      <!-- 2-Column Bulletin Front Page: Centrepiece Main Column (7 cols, Horizontal) | Right Dispatch Stack (5 cols, Vertical) -->
+      <div class="front-col-centrepiece front-col-bulletin-main" style="grid-column: span 7; min-width: 0; display: flex; flex-direction: column; gap: 1.25rem; border-right: var(--rule-thin-border); padding-right: 1.25rem;">
+        {% if page.articles|length > 0 %}
+          {% set article = page.articles[0] %}
+          <div class="grid-slot slot-{{ article.slot_kind }} slot-primary-lead slot-centrepiece-lead space-horizontal" data-testid="centrepiece-lead-slot">
+            <div class="centrepiece-ribbon">★ FRONT-PAGE CENTREPIECE · MOST-MENTIONED MAIN NEWS ({{ article.mention_count or 1 }} SOURCES) ★</div>
+            {% include "partials/article_block.html" %}
+          </div>
+        {% endif %}
+
+        <div class="grid-slot slot-filler slot-filler-grow space-horizontal">
+          {% if page.whitespace_fillers and page.whitespace_fillers|length > 1 %}
+            {% set filler = page.whitespace_fillers[1] %}
+            {% if filler.filler_type == "comic_joke" %}
+              {% include "partials/comic_strip_box.html" %}
+            {% elif filler.filler_type == "muse_brief_ad" %}
+              {% include "partials/house_ad_box.html" %}
+            {% else %}
+              {% include "partials/curiosities_box.html" %}
+            {% endif %}
+          {% else %}
+            {% include "partials/curiosities_box.html" %}
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="front-col-wing front-col-bulletin-side" style="grid-column: span 5; min-width: 0; display: flex; flex-direction: column; gap: 1.15rem;">
+        {% for article in page.articles[1:] %}
+          <div class="grid-slot slot-{{ article.slot_kind }} space-vertical">
+            {% include "partials/article_block.html" %}
+          </div>
+        {% endfor %}
+
+        <div class="grid-slot slot-filler slot-ad-front slot-filler-grow space-vertical">
+          {% if page.whitespace_fillers and page.whitespace_fillers|length > 0 %}
+            {% set filler = page.whitespace_fillers[0] %}
+            {% if filler.filler_type == "comic_joke" %}
+              {% include "partials/comic_strip_box.html" %}
+            {% elif filler.filler_type == "muse_brief_ad" %}
+              {% include "partials/house_ad_box.html" %}
+            {% else %}
+              {% include "partials/curiosities_box.html" %}
+            {% endif %}
+          {% else %}
+            {% with comic_variant="mechanical" %}
+              {% include "partials/comic_strip_box.html" %}
+            {% endwith %}
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  {% if edition.format_name == "bulletin" %}
+    {% include "partials/corrections_box.html" %}
+  {% endif %}
+
+  <footer class="newspaper-page-footer">
+    <span>{{ edition.publication_title }} · Edition No. {{ edition.edition_number }} ({{ edition.format_label }})</span>
+    <span class="design-version-stamp" data-testid="design-version-footer">Design Identity v{{ edition.design_version }}</span>
+    <span>Page {{ page.page_number }} of {{ edition.total_pages }}</span>
+  </footer>
+</section>

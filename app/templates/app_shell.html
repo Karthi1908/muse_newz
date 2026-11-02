@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en" data-design-version="{{ edition.design_version }}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ edition.publication_title }} — Edition No. {{ edition.edition_number }} ({{ edition.format_label }})</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/tokens.v1.css?v=2.3" />
+  <link rel="stylesheet" href="/static/css/newspaper.css?v=2.3" />
+  {% if inlined_tokens_css %}
+  <style>{{ inlined_tokens_css | safe }}</style>
+  {% endif %}
+  {% if inlined_newspaper_css %}
+  <style>{{ inlined_newspaper_css | safe }}</style>
+  {% endif %}
+  <style>
+    .app-toolbar {
+      background-color: var(--bg-elevated);
+      border-bottom: var(--rule-heavy-border);
+      padding: 0.65rem 1.25rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      font-family: var(--font-ui);
+      font-size: var(--scale-caption);
+    }
+    .toolbar-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .btn-action {
+      background-color: var(--bg-paper);
+      color: var(--ink-primary);
+      border: var(--rule-thin-border);
+      padding: 0.38rem 0.75rem;
+      font-family: var(--font-ui);
+      font-size: var(--scale-caption);
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background-color: var(--ink-primary);
+      color: var(--bg-paper);
+    }
+    .app-drawer {
+      max-width: var(--grid-max-width);
+      margin: 0.75rem auto;
+      padding: 1.25rem 1.5rem;
+      background-color: var(--bg-elevated);
+      border: var(--rule-heavy-border);
+      font-family: var(--font-ui);
+    }
+    .drawer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+    .live-progress-banner,
+    .new-edition-banner {
+      max-width: var(--grid-max-width);
+      margin: 0.75rem auto 0;
+      padding: 0.65rem 1rem;
+      border: var(--rule-heavy-border);
+      background-color: var(--verified-bg);
+      color: var(--verified-fg);
+      font-family: var(--font-ui);
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .archive-list {
+      list-style: none;
+      padding: 0;
+      margin: 0.75rem 0 0;
+      display: grid;
+      gap: 0.6rem;
+    }
+    .archive-item {
+      padding: 0.6rem 0.85rem;
+      background-color: var(--bg-paper);
+      border: var(--rule-thin-border);
+    }
+    .archive-meta {
+      font-size: var(--scale-meta);
+      color: var(--ink-muted);
+      margin-top: 0.2rem;
+    }
+    .form-row {
+      margin-bottom: 0.65rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .form-input {
+      padding: 0.4rem 0.6rem;
+      border: var(--rule-thin-border);
+      background-color: var(--bg-paper);
+      color: var(--ink-primary);
+      font-family: var(--font-ui);
+    }
+    .topic-chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin: 0.6rem 0;
+      padding: 0;
+      list-style: none;
+    }
+    .topic-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.65rem;
+      background-color: var(--bg-paper);
+      border: var(--rule-thin-border);
+      border-radius: 3px;
+      font-size: 0.85rem;
+      font-family: var(--font-ui);
+      font-weight: 500;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .topic-chip-del {
+      background: none;
+      border: none;
+      color: var(--ink-muted);
+      cursor: pointer;
+      font-weight: bold;
+      padding: 0 0.2rem;
+      line-height: 1;
+      font-size: 0.95rem;
+      transition: color 0.15s ease;
+    }
+    .topic-chip-del:hover {
+      color: var(--corrected-fg);
+    }
+  </style>
+</head>
+<body>
+  <!-- Reader App Chrome (Hidden in Print via .no-print) -->
+  <nav class="app-toolbar no-print" aria-label="Newspaper Controls">
+    <div>
+      <strong id="toolbar-pub-title">{{ edition.publication_title }}</strong> ·
+      <span>Cadence: <strong>{{ schedule.cadence }}</strong> ({{ edition.format_label }})</span> ·
+      <span>Region: <strong data-testid="toolbar-geo-value">{{ reader.geographic_preference or 'Global' }}</strong></span> ·
+      <span>Next Edition: <strong>{{ schedule.next_due_at.strftime('%Y-%m-%d %H:%M UTC') if schedule.next_due_at else 'Paused' }}</strong></span>
+      {% if schedule.last_run_status %}
+        · <span>Last Status: <strong>{{ schedule.last_run_status|upper }}</strong></span>
+      {% endif %}
+      · <span>Today's Builds: <strong>{{ schedule.builds_today_count }}/{{ schedule.daily_cap }}</strong></span>
+    </div>
+
+    <div class="toolbar-actions">
+      <button type="button" class="btn-action btn-primary" onclick="window.DailyMuseApp.generateNow()">
+        ⚡ Generate Now
+      </button>
+      <button type="button" class="btn-action" onclick="window.DailyMuseApp.togglePanel('drawer-topics')">
+        ✏️ Topics, Region &amp; Voice (<span id="toolbar-topic-count">{{ reader.topics|length }}/5</span> · <span id="toolbar-geo-label">{{ reader.geographic_preference or 'Global' }}</span>)
+      </button>
+      <button type="button" class="btn-action" onclick="window.DailyMuseApp.togglePanel('drawer-schedule')">
+        🕒 Delivery Rhythm &amp; Demo Mode
+      </button>
+      <button type="button" class="btn-action" onclick="window.DailyMuseApp.togglePanel('drawer-archive')">
+        🗂️ Archive ({{ archive_list|length }}/{{ retention_limit }})
+      </button>
+      <button type="button" class="btn-action" onclick="window.print()">
+        🖨️ Print Paper
+      </button>
+      <a class="btn-action" href="/api/editions/{{ edition.edition_id }}/download">
+        ⬇️ Single-File HTML
+      </a>
+      <button type="button" class="btn-action" onclick="window.DailyMuseApp.toggleDarkMode()">
+        🌓 Ink Mode
+      </button>
+    </div>
+  </nav>
+
+  <!-- Live Build Progress Banner (FR-036) -->
+  <div id="live-build-progress-banner" class="live-progress-banner no-print" hidden>
+    <span id="live-build-progress-text">Building your edition...</span>
+  </div>
+
+  <!-- New Edition Indicator (FR-013) -->
+  <div id="new-edition-indicator" class="new-edition-banner no-print" {% if not schedule.new_edition_available %}hidden{% endif %}>
+    <span>📰 A new scheduled edition of {{ edition.publication_title }} has arrived on the press!</span>
+    <a href="/" class="btn-action">Read Latest Edition</a>
+  </div>
+
+  {% if schedule.last_failure_reason %}
+    <div class="edition-notices-banner no-print" style="max-width: var(--grid-max-width); margin: 0.75rem auto;">
+      <strong>Schedule Notice:</strong> {{ schedule.last_failure_reason }}
+    </div>
+  {% endif %}
+
+  <!-- Drawer 1: Topics & Voice Editor (FR-001..003, Story 8) -->
+  <section id="drawer-topics" class="app-drawer no-print" hidden>
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: var(--rule-thin-border); padding-bottom: 0.5rem; margin-bottom: 0.75rem;">
+      <h3 style="margin: 0;">Editorial Beats (1 to 5 Topics — Any number &le; 5 allowed)</h3>
+      <span style="font-size: 0.85rem; color: var(--ink-secondary);">
+        Active: <strong id="active-topic-count">{{ reader.topics|length }} of max 5</strong>
+      </span>
+    </div>
+
+    <!-- Hidden element storing raw JSON topics for JS initialization -->
+    <script id="active-topics-data" type="application/json">{{ reader.topics | tojson }}</script>
+
+    <div class="drawer-grid">
+      <div>
+        <div class="form-row">
+          <label for="reader-name-input"><strong>Reader Name on Masthead (The [Name] Courier):</strong></label>
+          <input
+            id="reader-name-input"
+            type="text"
+            class="form-input"
+            placeholder="e.g. Aisha (leave blank for The Muse Courier)"
+            value="{{ reader.reader_name }}"
+            oninput="window.DailyMuseApp.onReaderNameInputChange()"
+          />
+          <span id="masthead-preview-hint" style="font-size: 0.78rem; color: var(--ink-secondary);">
+            Masthead: <strong>{{ reader.publication_title }}</strong> — <em>{{ reader.publication_tagline }}</em>
+          </span>
+        </div>
+
+        <div class="form-row">
+          <label for="reader-geo-select"><strong>Geographic Preference (Regional Editorial Focus):</strong></label>
+          {% set geo = reader.geographic_preference or 'Global' %}
+          {% set preset_geos = ['Global', 'United States & North America', 'Europe & United Kingdom', 'Asia-Pacific', 'India & South Asia', 'Middle East & Africa', 'Latin America'] %}
+          <div style="display: flex; gap: 0.45rem; flex-wrap: wrap;">
+            <select id="reader-geo-select" class="form-input" style="flex: 1;" onchange="window.DailyMuseApp.onGeoSelectChange()">
+              {% for g in preset_geos %}
+                <option value="{{ g }}" {% if geo == g %}selected{% endif %}>{{ g }}</option>
+              {% endfor %}
+              <option value="__custom__" {% if geo not in preset_geos %}selected{% endif %}>Custom Region / Country / City...</option>
+            </select>
+            <input
+              id="reader-geo-custom-input"
+              type="text"
+              class="form-input"
+              style="flex: 1; {% if geo in preset_geos %}display: none;{% endif %}"
+              placeholder="e.g. Singapore, Nordic Region, Japan..."
+              value="{{ geo if geo not in preset_geos else '' }}"
+              oninput="window.DailyMuseApp.onGeoCustomChange()"
+            />
+          </div>
+          <span style="font-size: 0.76rem; color: var(--ink-muted);">
+            Shapes regional beat reporting alongside global front-page centrepiece dispatches.
+          </span>
+        </div>
+
+        <p style="margin-bottom: 0.2rem;"><strong>Your Active Topics:</strong></p>
+        <p style="font-size: 0.78rem; color: var(--ink-muted); margin-top: 0;">
+          Click ✕ on any topic to delete it. You can follow any number between 1 and 5 topics.
+        </p>
+
+        <!-- Dynamic Topic Chips with Delete Buttons -->
+        <div id="active-topic-chips" class="topic-chip-list">
+          {% for t in reader.topics %}
+            <div class="topic-chip">
+              <span>{{ t }}</span>
+              <button type="button" class="topic-chip-del" title="Remove '{{ t }}'" onclick="window.DailyMuseApp.removeTopicByIndex({{ loop.index0 }})">✕</button>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Direct Add Topic Input Row -->
+        <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem;">
+          <input
+            id="new-topic-direct-input"
+            type="text"
+            class="form-input"
+            style="flex: 1;"
+            placeholder="Add new topic (or comma-separated topics)..."
+            onkeydown="if(event.key==='Enter'){window.DailyMuseApp.addTopicDirectly();}"
+          />
+          <button id="btn-add-topic-direct" type="button" class="btn-action" onclick="window.DailyMuseApp.addTopicDirectly()">
+            + Add Topic
+          </button>
+        </div>
+
+        <div style="margin-top: 0.6rem;">
+          <button type="button" class="btn-action" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" onclick="window.DailyMuseApp.resetDefaultTopics()">
+            🔄 Reset to 5 Default Beats
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div class="form-row">
+          <label for="topic-command-input"><strong>Natural Language / Voice Command:</strong></label>
+          <input
+            id="topic-command-input"
+            type="text"
+            class="form-input"
+            placeholder="e.g. drop clean energy; add fintech; set region to Europe & UK"
+            onkeydown="if(event.key==='Enter'){window.DailyMuseApp.submitTopicCommand();}"
+          />
+        </div>
+        <p style="font-size: 0.78rem; color: var(--ink-muted); margin-top: -0.2rem;">
+          Supports multi-delete, multi-add &amp; geographic preference (e.g. <em>"drop topic 1"</em>, <em>"add quantum, robotics"</em>, <em>"set region to Asia-Pacific"</em>).
+        </p>
+        <div style="display: flex; gap: 0.5rem; margin-top: 0.4rem;">
+          <button type="button" class="btn-action btn-primary" onclick="window.DailyMuseApp.submitTopicCommand()">
+            Preview Change
+          </button>
+          <button id="btn-voice-record" type="button" class="btn-action" onclick="window.DailyMuseVoice.toggleRecord()">
+            🎙️ Speak Topic Change
+          </button>
+        </div>
+        <p id="voice-status-msg" style="font-size: 0.8rem; color: var(--ink-secondary);"></p>
+
+        <!-- Confirmation Box (FR-003: Require confirmation before saving) -->
+        <div id="topic-proposal-box" style="margin-top: 0.75rem; padding: 0.75rem; border: var(--rule-thin-border); background: var(--bg-paper);" hidden>
+          <p id="proposal-assistant-msg" style="font-weight: 600; margin-top: 0;"></p>
+          <ul id="proposal-topics-list"></ul>
+
+          <!-- Overflow Replacement Picker (Story 8: Never silently truncate >5 topics) -->
+          <div id="proposal-replace-picker" hidden>
+            <label for="replace-topic-select">Select which existing topic to replace:</label>
+            <select id="replace-topic-select" class="form-input" style="margin: 0.4rem 0;"></select>
+            <button type="button" class="btn-action btn-primary" onclick="window.DailyMuseApp.applyReplacementChoice()">
+              Replace Selected Topic
+            </button>
+          </div>
+
+          <button id="btn-confirm-topics" type="button" class="btn-action btn-primary" onclick="window.DailyMuseApp.confirmTopicSave()">
+            ✓ Confirm &amp; Save Topics (Applies to Next Edition)
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Drawer 2: Delivery Rhythm & Demo Mode (FR-004..012, FR-038, Story 3) -->
+  <section id="drawer-schedule" class="app-drawer no-print" hidden>
+    <h3>Delivery Cadence &amp; Schedule Settings</h3>
+    <div class="drawer-grid">
+      <div>
+        <div class="form-row">
+          <label for="sched-cadence"><strong>Delivery Rhythm (Determines Edition Format):</strong></label>
+          <select id="sched-cadence" class="form-input" onchange="window.DailyMuseApp.previewScheduleNextRun()">
+            <option value="every_4h" {% if schedule.cadence == 'every_4h' %}selected{% endif %}>Every 4 hours — Bulletin (1 page, 3 articles)</option>
+            <option value="every_8h" {% if schedule.cadence == 'every_8h' %}selected{% endif %}>Every 8 hours — Bulletin (1 page, 3 articles)</option>
+            <option value="every_12h" {% if schedule.cadence == 'every_12h' %}selected{% endif %}>Every 12 hours — Daily (2 pages, 8 articles)</option>
+            <option value="daily" {% if schedule.cadence == 'daily' %}selected{% endif %}>Daily (24 h) — Daily (2 pages, 8 articles)</option>
+            <option value="weekly" {% if schedule.cadence == 'weekly' %}selected{% endif %}>Weekly — Weekly Edition (3–7 pages, up to 16 articles)</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="sched-start-time"><strong>Local Delivery Time:</strong></label>
+          <input id="sched-start-time" type="time" class="form-input" value="{{ schedule.start_time_local }}" onchange="window.DailyMuseApp.previewScheduleNextRun()" />
+        </div>
+        <div class="form-row">
+          <label for="sched-weekday"><strong>Weekly Delivery Day (for Weekly cadence):</strong></label>
+          <select id="sched-weekday" class="form-input" onchange="window.DailyMuseApp.previewScheduleNextRun()">
+            {% for wd in ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'] %}
+              <option value="{{ wd }}" {% if schedule.weekly_weekday == wd %}selected{% endif %}>{{ wd }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <div class="form-row">
+          <label for="sched-timezone"><strong>Time Zone (DST-Aware IANA Zone):</strong></label>
+          <input id="sched-timezone" type="text" class="form-input" value="{{ schedule.time_zone }}" onchange="window.DailyMuseApp.previewScheduleNextRun()" />
+        </div>
+        <div class="form-row" style="flex-direction: row; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+          <input id="sched-demo-mode" type="checkbox" {% if schedule.demo_mode %}checked{% endif %} onchange="window.DailyMuseApp.previewScheduleNextRun()" />
+          <label for="sched-demo-mode"><strong>Enable Compressed Demo Mode (Auto-builds every 2 minutes for SC-012)</strong></label>
+        </div>
+        <p id="schedule-preview-text" style="font-weight: 600; color: var(--verified-fg);">
+          Next planned edition: {{ schedule.next_due_at.strftime('%Y-%m-%d %H:%M UTC') if schedule.next_due_at else 'Paused' }}
+        </p>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button type="button" class="btn-action btn-primary" onclick="window.DailyMuseApp.saveSchedule()">
+            Save Schedule
+          </button>
+          {% if schedule.paused %}
+            <button type="button" class="btn-action" onclick="window.DailyMuseApp.togglePauseSchedule(false)">
+              ▶️ Resume Schedule
+            </button>
+          {% else %}
+            <button type="button" class="btn-action" onclick="window.DailyMuseApp.togglePauseSchedule(true)">
+              ⏸️ Pause Schedule
+            </button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Drawer 3: Past Editions Archive (FR-035, Story 6) -->
+  <section id="drawer-archive" class="app-drawer no-print" hidden>
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+      <h3 style="margin: 0;">Past Editions Archive (Newest First · Retention Limit: {{ retention_limit }} Editions)</h3>
+      <div style="display: flex; gap: 0.4rem;">
+        <button type="button" class="btn-action" onclick="window.DailyMuseApp.filterArchive('')">All Formats</button>
+        <button type="button" class="btn-action" onclick="window.DailyMuseApp.filterArchive('bulletin')">Bulletin (1p)</button>
+        <button type="button" class="btn-action" onclick="window.DailyMuseApp.filterArchive('daily')">Daily (2p)</button>
+        <button type="button" class="btn-action" onclick="window.DailyMuseApp.filterArchive('weekly')">Weekly (3–7p)</button>
+      </div>
+    </div>
+    <ul id="archive-editions-list" class="archive-list">
+      {% for ed in archive_list %}
+        <li class="archive-item">
+          <a href="/?edition_id={{ ed.edition_id }}">
+            <strong>No. {{ ed.edition_number }} — {{ ed.format_label }}</strong>
+            <span>({{ ed.total_pages }} page(s), {{ ed.total_articles }} articles)</span>
+          </a>
+          <div class="archive-meta">
+            {{ ed.published_at }} · Verified: {{ ed.claims_verified }}/{{ ed.claims_checked }} claims ·
+            Corrections: {{ ed.corrections_count }} · Design Identity v{{ ed.design_version }}
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <!-- Main Newspaper Pages (Identical Design Identity across Bulletin, Daily, Weekly) -->
+  <main class="newspaper-edition-container" data-edition-id="{{ edition.edition_id }}" data-format="{{ edition.format_name }}" data-design-version="{{ edition.design_version }}">
+    {% for page in edition.pages %}
+      {% if page.template == "front" %}
+        {% include "pages/front.html" %}
+      {% elif page.template == "inside" %}
+        {% include "pages/inside.html" %}
+      {% elif page.template == "section" %}
+        {% include "pages/section.html" %}
+      {% elif page.template == "closing" %}
+        {% include "pages/closing.html" %}
+      {% endif %}
+    {% endfor %}
+  </main>
+
+  <script src="/static/js/tts.js?v=2.3"></script>
+  <script src="/static/js/voice.js?v=2.3"></script>
+  <script src="/static/js/app.js?v=2.3"></script>
+</body>
+</html>

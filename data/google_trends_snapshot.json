@@ -1,0 +1,23 @@
+{
+  "captured_at": "2026-10-31T00:00:00Z",
+  "outside_topic_themes": [
+    {
+      "topic": "Deep-Sea Hydrothermal Biology & Ocean Conservation",
+      "headline": "Marine Biologists Map Unprecedented Bioluminescent Coral Reef Systems Below 2,400 Meters in the Mariana Trench",
+      "url": "https://oceanographic-institute.example.org/dispatches/2026/mariana-bioluminescent-reef-discovery",
+      "source_name": "Global Oceanographic Dispatch",
+      "published_date": "2026-10-30",
+      "rationale": "Selected deliberately outside your usual tech, energy, and biotech beats to broaden your perspective with major natural-science exploration.",
+      "verbatim_text": "Expedition vessel RV Abyssal Horizon completed a 42-day autonomous submersible survey of the southern Mariana arc on October 30, 2026, documenting 14 previously unknown species of bioluminescent octocorals at depths between 2,100 and 2,450 meters. Lead marine ecologist Dr. Helena Vance reported that the reef structures span 18 square kilometers along low-temperature alkaline vents where water temperatures remain a steady 4.2 degrees Celsius. Acoustic and chemical sensors confirmed that the corals rely on symbiotic chemosynthetic bacteria oxidizing dissolved hydrogen rather than photosynthetic algae. Over 380 high-resolution spectroscopy samples were archived at the Pacific Marine Repository, prompting the International Seabed Authority to propose an immediate 50-nautical-mile conservation buffer zone around the ridge."
+    },
+    {
+      "topic": "Classical Epigraphy & Cultural Heritage Preservation",
+      "headline": "Multi-Spectral Imaging Reveals Lost Stoic Philosophical Treatise in Carbonized Herculaneum Scroll Fragment",
+      "url": "https://heritage-epigraphy.example.org/reports/2026/herculaneum-stoic-scroll-decoded",
+      "source_name": "European Review of Classical Archaeology",
+      "published_date": "2026-10-29",
+      "rationale": "Selected deliberately outside your usual reading to surface a landmark humanities and archaeological breakthrough.",
+      "verbatim_text": "Papyrologists at the Naples National Library announced on October 29, 2026 that phase-contrast synchrotron X-ray tomography successfully resolved 112 columns of Greek text inside Papyrus PHerc. 1428 without physically unrolling the fragile carbonized scroll. The text has been attributed to the early Stoic philosopher Chrysippus of Soli and comprises an treatise on logic and epistemic certainty written around 230 BCE. Project director Prof. Marco Bellini confirmed that 3,400 words have been transcribed with 94 percent character confidence and verified by three independent epigraphic panels. The digital facsimile will be released under an open academic license in November 2026."
+    }
+  ]
+}
