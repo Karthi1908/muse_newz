@@ -23,7 +23,7 @@
   {% endif %}
 
   <div class="article-byline-row">
-    <span class="article-byline">{{ article.byline }}</span>
+    <span class="article-byline">{{ article.byline | replace("By Your Daily Muse", "By Muse Newz") | replace("Your Daily Muse", "Muse Newz") | replace("Daily Muse", "Muse Newz") }}</span>
     <span class="article-factcheck-badge verified-badge">
       ✓ {{ article.verified_claims_count }} Verified Claims
       {% if article.corrected_claims_count > 0 or article.removed_claims_count > 0 %}

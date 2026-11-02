@@ -17,7 +17,7 @@
           The Sovereign Fact-Checker’s Emblem
         {% endif %}
       </div>
-      <h3 class="house-ad-title">{{ (filler and filler.title) or "THE MUSE NEWZ" }}</h3>
+      <h3 class="house-ad-title">{{ (filler and (filler.title | replace("YOUR MUSE BRIEF", "THE MUSE NEWZ") | replace("Your Muse Brief", "The Muse Newz") | replace("MUSE BRIEF", "MUSE NEWZ") | replace("Muse Brief", "Muse Newz"))) or "THE MUSE NEWZ" }}</h3>
       <p class="house-ad-tagline">
         {% if filler and filler.comic_dialogue_speaker %}
           {{ filler.comic_dialogue_speaker }}

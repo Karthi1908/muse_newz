@@ -333,6 +333,12 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
                         f_item.image_data_uri = _encode_static_image_data_uri(f_item.image_path)
                         changed = True
 
+                # Ensure filler title uses 'THE MUSE NEWZ'
+                if f_item.title and "MUSE BRIEF" in f_item.title.upper():
+                    clean_t = f_item.title.replace("YOUR MUSE BRIEF", "THE MUSE NEWZ").replace("Your Muse Brief", "The Muse Newz").replace("MUSE BRIEF", "MUSE NEWZ")
+                    f_item = f_item.model_copy(update={"title": clean_t})
+                    changed = True
+
                 # Check if this filler duplicates an already-used variant_key or image_path in this edition!
                 is_dup_filler = (
                     (f_item.variant_key and f_item.variant_key in used_filler_keys)

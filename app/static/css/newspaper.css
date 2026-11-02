@@ -237,6 +237,25 @@ a {
 }
 
 /* Balanced Section Page Columns */
+.section-page-banner {
+  border-top: var(--rule-heavy-border);
+  border-bottom: var(--rule-heavy-border);
+  padding: 0.35rem 0;
+  margin: 0.4rem 0 1rem;
+  text-align: center;
+}
+
+.section-page-heading {
+  font-family: var(--font-headline);
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-primary);
+  margin: 0;
+  line-height: 1.2;
+}
+
 .section-col-main {
   grid-column: span 7;
   min-width: 0;
@@ -566,12 +585,13 @@ a {
 }
 
 .house-ad-title {
-  font-family: var(--font-masthead);
-  font-size: 1.55rem;
-  font-weight: 400;
-  line-height: 1.1;
-  margin: 0.15rem 0;
-  letter-spacing: 0.04em;
+  font-family: var(--font-headline);
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.15;
+  margin: 0.2rem 0;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--ink-primary);
 }
 
@@ -723,11 +743,13 @@ a {
 }
 
 .comic-banner {
-  font-family: var(--font-masthead);
-  font-size: 1.4rem;
-  line-height: 1.1;
+  font-family: var(--font-headline);
+  font-weight: 800;
+  font-size: 1.25rem;
+  line-height: 1.2;
   color: var(--ink-primary);
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .comic-subtitle {

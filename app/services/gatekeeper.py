@@ -220,6 +220,12 @@ class VerificationGatekeeper:
             else None
         )
 
+        clean_byline = draft.byline
+        if clean_byline:
+            clean_byline = re.sub(r"By\s+Your\s+Daily\s+Muse\b", "By Muse Newz", clean_byline, flags=re.I)
+            clean_byline = re.sub(r"Your\s+Daily\s+Muse\b", "Muse Newz", clean_byline, flags=re.I)
+            clean_byline = re.sub(r"Daily\s+Muse\b", "Muse Newz", clean_byline, flags=re.I)
+
         article = PublishedArticle(
             slot_id=slot.slot_id,
             page_number=slot.page_number,
@@ -228,7 +234,7 @@ class VerificationGatekeeper:
             topic=slot.topic,
             headline=draft.headline,
             deck=draft.deck,
-            byline=draft.byline,
+            byline=clean_byline,
             body_paragraphs=cleaned_paragraphs,
             sources=sources,
             claims=processed_claims,
