@@ -2,6 +2,7 @@ import os
 import shutil
 import sys
 from pathlib import Path
+from starlette.responses import JSONResponse
 
 # Ensure root workspace directory is in python search path
 root_dir = Path(__file__).resolve().parent.parent
@@ -27,15 +28,36 @@ if os.getenv("VERCEL") == "1":
 
 from app.main import app as fastapi_app
 
-# Vercel ASGI path normalizer: ensures /api/index.py rewrites resolve to root FastAPI routes
 async def app(scope, receive, send):
-    if scope.get("type") in ("http", "websocket"):
-        headers = dict(scope.get("headers", []))
-        matched = headers.get(b"x-matched-path", b"").decode("utf-8")
+    if scope.get("type") == "http":
+        raw_path = scope.get("path", "")
+        # Diagnostic endpoint
+        if raw_path in ("/debug_info", "/api/debug_info", "/api/index.py/debug_info"):
+            headers_dict = {}
+            for k, v in scope.get("headers", []):
+                k_str = k.decode("latin-1") if isinstance(k, bytes) else str(k)
+                v_str = v.decode("latin-1") if isinstance(v, bytes) else str(v)
+                headers_dict[k_str] = v_str
+            resp = JSONResponse({
+                "scope_path": scope.get("path"),
+                "scope_raw_path": scope.get("raw_path", b"").decode("latin-1", errors="ignore") if isinstance(scope.get("raw_path"), bytes) else str(scope.get("raw_path")),
+                "root_path": scope.get("root_path", ""),
+                "headers": headers_dict,
+            })
+            await resp(scope, receive, send)
+            return
+
+        headers = {}
+        for k, v in scope.get("headers", []):
+            k_str = k.decode("latin-1").lower() if isinstance(k, bytes) else str(k).lower()
+            v_str = v.decode("latin-1") if isinstance(v, bytes) else str(v)
+            headers[k_str] = v_str
+
+        matched = headers.get("x-matched-path", "")
         if matched:
             if "?" in matched:
                 matched = matched.split("?", 1)[0]
-            if not (matched == "/api/index.py" or matched == "/api/index"):
+            if not matched.startswith("/api/index"):
                 scope["path"] = matched
 
         path = scope.get("path", "")

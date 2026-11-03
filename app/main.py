@@ -71,6 +71,9 @@ class ScheduleUpdateRequest(BaseModel):
 
 
 @app.get("/", response_class=HTMLResponse)
+@app.get("/api", response_class=HTMLResponse)
+@app.get("/api/index.py", response_class=HTMLResponse)
+@app.get("/api/index", response_class=HTMLResponse)
 async def read_newspaper_home(
     request: Request,
     edition_id: Optional[str] = Query(default=None),
@@ -119,6 +122,7 @@ async def read_newspaper_home(
 
 
 @app.get("/api/status")
+@app.get("/status")
 async def get_newsroom_status() -> dict[str, Any]:
     return {
         "schedule": storage.get_schedule_state().model_dump(mode="json"),
@@ -128,6 +132,7 @@ async def get_newsroom_status() -> dict[str, Any]:
 
 
 @app.get("/api/editions")
+@app.get("/editions")
 async def list_archive_editions(format: Optional[str] = Query(default=None)) -> dict[str, Any]:
     items = storage.list_editions(format_filter=format)
     return {
@@ -137,6 +142,7 @@ async def list_archive_editions(format: Optional[str] = Query(default=None)) -> 
 
 
 @app.get("/api/editions/{edition_id}")
+@app.get("/editions/{edition_id}")
 async def get_single_edition(edition_id: str) -> dict[str, Any]:
     ed = storage.get_edition(edition_id)
     if not ed:
@@ -145,6 +151,7 @@ async def get_single_edition(edition_id: str) -> dict[str, Any]:
 
 
 @app.get("/api/editions/{edition_id}/images/{filename}")
+@app.get("/editions/{edition_id}/images/{filename}")
 async def get_edition_image(edition_id: str, filename: str) -> FileResponse:
     img_path = settings.EDITIONS_DIR / edition_id / "images" / filename
     if not img_path.exists():
