@@ -65,6 +65,16 @@ def _score_published_article_magnitude(art: PublishedArticle) -> float:
     return score
 
 
+def _desk_byline(topic: str, outside: bool = False) -> str:
+    """Canonical byline: 'By Muse Newz <Topic> Desk' with clean capitalisation (AI/CRISPR stay upper-case)."""
+    if outside:
+        return "By Muse Newz Outside Reading Desk"
+    words = []
+    for w in (topic or "General").split():
+        words.append(w if (w.isupper() or any(c.isupper() for c in w[1:])) else w[:1].upper() + w[1:])
+    return f"By Muse Newz {' '.join(words)} Desk"
+
+
 def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple[PublishedEdition, bool]:
     """
     Ensures any edition (including previously stored editions in SQLite) has:
@@ -127,13 +137,8 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
 
                     lead_uri = new_lead.image_data_uri
                     lead_path = new_lead.image_path
-                    if not lead_uri or lead_uri.startswith("data:image/svg+xml"):
-                        found = _find_cached_real_image(new_lead.headline, new_lead.topic, cache_dir, used_hashes)
-                        if found:
-                            lead_uri, _, chash = found
-                            used_hashes.add(chash)
-                        elif not lead_uri:
-                            lead_uri = build_house_svg_illustration(new_lead.topic, new_lead.headline, "p1_lead")
+                    if lead_uri and lead_uri.startswith("data:image/svg+xml"):
+                        lead_uri = None  # never reuse fuzzy-matched cached art; a fresh bespoke woodcut is generated below
                     lead_caption = (
                         f"Illustration: Editorial woodcut depiction of {new_lead.headline} "
                         f"(Your Daily Muse House Illustration Style)."
@@ -165,8 +170,23 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
                     changed = True
 
         # 2. Deduplicate stories across the entire edition & set mention_count + layout_orientation
+        section_topic: str | None = None
+        if (page.section_flag or "").startswith("Section:"):
+            section_topic = page.section_flag.split(":", 1)[1].strip()
         deduped_page_articles: List[PublishedArticle] = []
         for a_idx, art in enumerate(page.articles):
+            if section_topic and not art.outside_flag and art.topic != section_topic:
+                art = art.model_copy(update={"topic": section_topic})
+                changed = True
+            # Decode stray HTML entities from live RSS feeds (e.g. '&nbsp;')
+            import html as _html
+            for _fld in ("headline", "deck"):
+                _val = getattr(art, _fld, None)
+                if _val and "&" in _val:
+                    _clean = re.sub(r"\s+", " ", _html.unescape(_val).replace("\xa0", " ")).strip()
+                    if _clean != _val:
+                        setattr(art, _fld, _clean)
+                        changed = True
             norm_h = _normalize_headline(art.headline)
             fp = compute_story_fingerprint(norm_h, art.topic)
             is_binance_event = ("binance" in norm_h) or ("6.3 billion" in f"{art.headline} {art.deck or ''}".lower())
@@ -243,6 +263,12 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
                         if replacement_raw:
                             break
 
+                # On a dedicated section page, never keep an off-topic/duplicate story: drop it rather than
+                # let a mismatched story sit under the wrong section heading.
+                if replacement_raw is None and page.page_number > 1:
+                    changed = True
+                    continue
+
                 if replacement_raw is not None:
                     sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", replacement_raw["verbatim_text"]) if len(s.strip()) > 25]
                     p1 = f"{sentences[0]} [S1] {sentences[1] if len(sentences) > 1 else ''} [S1]".strip()
@@ -295,7 +321,7 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
                         update={
                             "headline": replacement_raw["headline"],
                             "deck": replacement_raw["summary"],
-                            "byline": f"By Your Daily Muse {art.topic} Desk",
+                            "byline": _desk_byline(art.topic, art.outside_flag),
                             "body_paragraphs": new_body,
                             "sources": [new_src, *extra_srcs],
                             "claims": new_claims,
@@ -314,6 +340,12 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
             seen_headlines_norm.add(norm_h)
             all_edition_headlines_norm.add(norm_h)
             seen_story_fps.add(fp)
+
+            # Desk name must always reflect the article's actual section (no stale/lowercase/mismatched desks)
+            desk = _desk_byline(art.topic, art.outside_flag)
+            if art.byline != desk:
+                art.byline = desk
+                changed = True
 
             # Set layout_orientation based on slot placement (Decision #14)
             target_orient: str = "vertical"
@@ -627,6 +659,22 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
                 changed = True
 
         page.whitespace_fillers = new_fillers
+
+    # Remove section pages left without any verified story (never show a section heading with no matching news),
+    # then renumber the remaining pages so folios stay consistent.
+    kept_pages = [p for p in edition.pages if p.page_number == 1 or p.articles or not (p.section_flag or "").startswith("Section:")]
+    if len(kept_pages) != len(edition.pages) and len(kept_pages) >= 1:
+        edition.pages = kept_pages
+        total = len(kept_pages)
+        for new_num, p in enumerate(kept_pages, start=1):
+            p.page_number = new_num
+            p.total_pages = total
+            for a in p.articles:
+                a.page_number = new_num
+            for f in p.whitespace_fillers:
+                f.page_number = new_num
+        edition.total_pages = total
+        changed = True
 
     # Recompute total_claims_checked & total_claims_verified if articles were updated
     if changed:
