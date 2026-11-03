@@ -48,7 +48,15 @@ class Settings:
         self.BASE_DIR: Path = BASE_DIR
         self.CONFIG_DIR: Path = BASE_DIR / "config"
         self.DESIGN_DIR: Path = BASE_DIR / "design"
-        self.DATA_DIR: Path = BASE_DIR / "data"
+
+        # On Vercel / serverless runtimes, root filesystem is read-only; use temp directory for data
+        import tempfile
+        is_vercel = os.getenv("VERCEL") == "1"
+        if is_vercel:
+            self.DATA_DIR: Path = Path(tempfile.gettempdir()) / "muse_data"
+        else:
+            self.DATA_DIR: Path = BASE_DIR / "data"
+
         self.EDITIONS_DIR: Path = self.DATA_DIR / "editions"
         self.DEMO_CACHE_DIR: Path = self.DATA_DIR / "demo_cache"
         self.DB_PATH: Path = self.DATA_DIR / "your_daily_muse.db"

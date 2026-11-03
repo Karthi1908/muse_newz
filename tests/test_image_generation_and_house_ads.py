@@ -104,3 +104,39 @@ def test_headline_normalization_and_cache_key():
     k3 = _get_headline_cache_key(h3)
 
     assert k1 == k2 == k3, "Normalized headline cache keys must match regardless of editorial prefixes"
+
+
+@pytest.mark.asyncio
+async def test_no_image_reused_across_consecutive_editions(tmp_path: Path):
+    """
+    Mandatory Freshness Rule:
+    Verifies that old images from past editions are NEVER reused in subsequent editions.
+    """
+    store = StorageService(db_path=tmp_path / "test_fresh.db", editions_dir=tmp_path / "editions_fresh")
+    runner = EditionPipelineRunner(storage=store)
+    t1 = datetime(2026, 10, 31, 10, 0, tzinfo=timezone.utc)
+    t2 = datetime(2026, 11, 1, 10, 0, tzinfo=timezone.utc)
+
+    # Build Edition 1
+    ed1 = await runner.execute_edition_build(trigger_type="manual", override_cadence="every_4h", now=t1)
+    imgs_ed1 = {
+        a.image_path for p in ed1.pages for a in p.articles if a.image_path
+    }
+    data_uris_ed1 = {
+        a.image_data_uri for p in ed1.pages for a in p.articles if a.image_data_uri
+    }
+
+    # Build Edition 2
+    ed2 = await runner.execute_edition_build(trigger_type="manual", override_cadence="every_4h", now=t2)
+    imgs_ed2 = {
+        a.image_path for p in ed2.pages for a in p.articles if a.image_path
+    }
+    data_uris_ed2 = {
+        a.image_data_uri for p in ed2.pages for a in p.articles if a.image_data_uri
+    }
+
+    # Cross-edition collision check
+    overlap_paths = imgs_ed1 & imgs_ed2
+    overlap_uris = data_uris_ed1 & data_uris_ed2
+    assert len(overlap_paths) == 0, f"Detected image path collision across editions: {overlap_paths}"
+    assert len(overlap_uris) == 0, "Detected identical image data URI across editions"

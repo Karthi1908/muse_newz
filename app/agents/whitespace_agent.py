@@ -320,6 +320,27 @@ class WhitespaceCreativeAgent:
                     fallback_factory=lambda: None,
                 )
                 if result and result.dialogue_or_copy:
+                    live_image_uri = inlined_uri
+                    if settings.has_live_api_key and settings.DEMO_CACHE_MODE != "always":
+                        try:
+                            headers = {
+                                "Authorization": f"Bearer {settings.MODEL_API_KEY}",
+                                "Content-Type": "application/json",
+                            }
+                            c_prompt = result.image_prompt or f"Victorian broadsheet satirical woodcut comic strip, monochrome ink: {topic} {result.comic_dialogue_speaker or ''}"
+                            async with httpx.AsyncClient(timeout=settings.IMAGE_TIMEOUT_SECONDS) as c_client:
+                                resp = await c_client.post(
+                                    settings.image_generations_url,
+                                    headers=headers,
+                                    json={"model": settings.MUSE_IMAGE_MODEL, "prompt": c_prompt},
+                                )
+                                if resp.status_code == 200:
+                                    b64 = resp.json()["data"][0].get("b64_json")
+                                    if b64:
+                                        live_image_uri = f"data:image/png;base64,{b64}"
+                        except Exception:
+                            pass
+
                     return WhitespaceFillerItem(
                         filler_id=f"filler_comic_{region.region_id}",
                         region_id=region.region_id,
@@ -332,7 +353,7 @@ class WhitespaceCreativeAgent:
                         comic_dialogue_speaker=result.comic_dialogue_speaker or "The Editor & The Automaton",
                         image_prompt=result.image_prompt or preset["prompt"],
                         image_path=preset["image_path"],
-                        image_data_uri=inlined_uri,
+                        image_data_uri=live_image_uri,
                         caption_or_motto=result.caption_or_motto or preset["motto"],
                         variant_key=preset["variant_key"],
                     )

@@ -144,12 +144,13 @@ class EditionPipelineRunner:
             message=f"Stage 1/5: Parallel Beat Reporters researching {len(reader_snapshot.topics)} topic(s)...",
             attempt=attempt,
         )
+        max_cands = 4 if format_name == "weekly" else 3
         raw_pool = await self.reporters.gather_candidate_pool(
             topics=reader_snapshot.topics,
             format_name=format_name,  # type: ignore[arg-type]
             window_start=win_start,
             window_end=win_end,
-            max_per_topic=3,
+            max_per_topic=max_cands,
             geographic_preference=reader_snapshot.geographic_preference,
         )
 

@@ -189,45 +189,77 @@ class EditorInChiefAgent:
                     )
                     preferred_topic = unrepresented[0]
 
-            # 1. Try highest-ranked unused story from preferred_topic
+            # 1. Try highest-ranked unused story from preferred_topic in candidate pool
             for c in scored_by_topic.get(preferred_topic, []):
                 if _is_unused(c):
                     _mark_used(c, is_page_one)
                     return c
-            # 2. Try highest-ranked unused story from any topic
-            for c in all_regular:
-                if _is_unused(c):
-                    _mark_used(c, is_page_one)
-                    return c
-            # 3. If fewer unique candidates exist than slots (Decision #13: NEVER clone or repeat a headline!),
-            # pull an unused verified dispatch from CURATED_TOPIC_DISPATCHES so every slot has a 100% unique story.
-            from app.models.schemas import SourceDocument
-            from app.services.search_web import CURATED_TOPIC_DISPATCHES, compute_story_fingerprint
 
-            for bucket in CURATED_TOPIC_DISPATCHES:
-                for raw in bucket["stories"]:
-                    fp = compute_story_fingerprint(raw["headline"], preferred_topic)
-                    if fp not in used_fingerprints:
-                        extra_cand = CandidateStory(
-                            candidate_id=f"cand_extra_{fp[:10]}",
-                            topic=preferred_topic,
-                            headline=raw["headline"],
-                            summary=raw["summary"],
-                            relevance_score=8.7,
-                            mention_count=int(raw.get("mention_count", 2)),
-                            story_fingerprint=fp,
-                            sources=[
-                                SourceDocument(
-                                    source_id="S1",
-                                    source_name=raw["source_name"],
-                                    url=raw["url"],
-                                    published_date=raw["published_date"],
-                                    verbatim_text=raw["verbatim_text"],
-                                )
-                            ],
+            # 2. Try unused candidate from any bucket in scored_by_topic that semantically matches preferred_topic
+            from app.services.search_web import (
+                compute_story_fingerprint,
+                get_curated_dispatches_for_topic,
+                topic_matches_bucket,
+            )
+            for t_name, cands in scored_by_topic.items():
+                if t_name != preferred_topic and (
+                    topic_matches_bucket(preferred_topic, [t_name])
+                    or topic_matches_bucket(t_name, [preferred_topic])
+                ):
+                    for c in cands:
+                        if _is_unused(c):
+                            _mark_used(c, is_page_one)
+                            return c
+
+            # 3. Pull an unused verified dispatch strictly matching preferred_topic from curated dispatches
+            from app.models.schemas import SourceDocument
+            matching_raws = get_curated_dispatches_for_topic(preferred_topic)
+            for raw in matching_raws:
+                fp = compute_story_fingerprint(raw["headline"], preferred_topic)
+                if fp not in used_fingerprints:
+                    extra_sources = [
+                        SourceDocument(
+                            source_id=es["source_id"],
+                            source_name=es["source_name"],
+                            url=es["url"],
+                            published_date=es["published_date"],
+                            verbatim_text=raw["verbatim_text"],
                         )
-                        _mark_used(extra_cand, is_page_one)
-                        return extra_cand
+                        for es in raw.get("extra_sources", [])
+                    ]
+                    extra_cand = CandidateStory(
+                        candidate_id=f"cand_extra_{fp[:10]}",
+                        topic=preferred_topic,
+                        headline=raw["headline"],
+                        summary=raw["summary"],
+                        relevance_score=8.7,
+                        mention_count=int(raw.get("mention_count", 2)),
+                        story_fingerprint=fp,
+                        sources=[
+                            SourceDocument(
+                                source_id="S1",
+                                source_name=raw["source_name"],
+                                url=raw["url"],
+                                published_date=raw["published_date"],
+                                verbatim_text=raw["verbatim_text"],
+                            ),
+                            *extra_sources,
+                        ],
+                    )
+                    _mark_used(extra_cand, is_page_one)
+                    return extra_cand
+
+            # 4. On Page 1 ONLY (the general broadsheet front-page overview across all reader beats):
+            # If an unassigned Page 1 slot has no remaining story from its initial topic, it can feature
+            # the highest-ranked unused story from another active reader topic.
+            if is_page_one:
+                for c in all_regular:
+                    if _is_unused(c):
+                        _mark_used(c, is_page_one)
+                        return c
+
+            # On dedicated section pages (Page > 1, e.g. Page 4 = Section: Movies):
+            # Spec §4.2 & Constitution §2: NEVER place unrelated stories into a beat section!
             return None
 
         def _pick_outside() -> CandidateStory | None:

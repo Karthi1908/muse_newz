@@ -47,6 +47,23 @@ def _extract_domain_tokens(text: str) -> Set[str]:
     return set(w for w in words if w not in stop_words)
 
 
+def _get_historically_used_image_hashes(editions_dir: Path) -> Set[str]:
+    """
+    Collects content hashes of all images used across all past editions to ensure
+    that old images are strictly never reused in new editions (Mandatory Freshness Rule).
+    """
+    used: Set[str] = set()
+    if not editions_dir.exists():
+        return used
+    for img_file in editions_dir.glob("*/images/*.png"):
+        try:
+            h = hashlib.sha256(img_file.read_bytes()).hexdigest()[:16]
+            used.add(h)
+        except Exception:
+            pass
+    return used
+
+
 def _find_cached_real_image(
     headline: str,
     topic: str,
@@ -204,8 +221,9 @@ class IllustratorService:
         img_dir = settings.EDITIONS_DIR / edition_id / "images"
         cache_dir = settings.DATA_DIR / "demo_cache" / "images"
 
-        # Track used image content hashes to guarantee strict uniqueness per edition
-        used_image_hashes: Set[str] = set()
+        # Track used image content hashes across all past editions to guarantee
+        # that old images are strictly NEVER reused in this or any future edition (Mandatory Freshness Rule).
+        used_image_hashes: Set[str] = _get_historically_used_image_hashes(settings.EDITIONS_DIR)
         updated_articles: List[PublishedArticle] = []
 
         for art in articles:
@@ -237,7 +255,40 @@ class IllustratorService:
                 )
                 continue
 
-            # Step 1: Check disk cache for unused real Meta Muse image
+            # Step 1: MANDATORY LIVE IMAGE GENERATION FIRST
+            # In live mode with API key, generate a brand-new unique image for every edition.
+            if settings.DEMO_CACHE_MODE != "always" and settings.has_live_api_key:
+                try:
+                    data_uri, raw_bytes = await self._call_muse_image_api(
+                        headline=art.headline,
+                        topic=art.topic,
+                        edition_number=manifest.edition_number,
+                    )
+                    content_hash = hashlib.sha256(raw_bytes).hexdigest()[:16]
+                    used_image_hashes.add(content_hash)
+
+                    img_dir.mkdir(parents=True, exist_ok=True)
+                    (img_dir / f"{art.slot_id}.png").write_bytes(raw_bytes)
+                    img_path = f"/api/editions/{edition_id}/images/{art.slot_id}.png"
+
+                    updated_articles.append(
+                        art.model_copy(
+                            update={
+                                "image_path": img_path,
+                                "image_data_uri": data_uri,
+                                "image_caption": caption_text,
+                                "used_placeholder_image": False,
+                            }
+                        )
+                    )
+                    continue
+                except Exception as exc:
+                    notices.append(
+                        f"Live image generation for '{art.headline}' failed ({exc}), falling back to fresh illustration."
+                    )
+
+            # Step 2: Offline / fallback mode
+            # Check disk cache ONLY for an unused real Meta Muse image that was NEVER used in any past edition!
             cached = _find_cached_real_image(art.headline, art.topic, cache_dir, used_image_hashes)
             if cached is not None:
                 data_uri, img_bytes, content_hash = cached
@@ -262,63 +313,8 @@ class IllustratorService:
                 )
                 continue
 
-            # Step 2: Live Meta Muse Image API call if not in "always" demo cache mode
-            if settings.DEMO_CACHE_MODE != "always" and settings.has_live_api_key:
-                try:
-                    data_uri, raw_bytes = await self._call_muse_image_api(art.headline, art.topic)
-                    content_hash = hashlib.sha256(raw_bytes).hexdigest()[:16]
-                    used_image_hashes.add(content_hash)
-
-                    # Cache to disk for future builds
-                    try:
-                        cache_dir.mkdir(parents=True, exist_ok=True)
-                        key = _get_headline_cache_key(art.headline)
-                        (cache_dir / f"{key}.png").write_bytes(raw_bytes)
-                        (cache_dir / f"{key}.json").write_text(
-                            json.dumps({
-                                "headline": art.headline,
-                                "topic": art.topic,
-                                "b64_json": data_uri.replace("data:image/png;base64,", ""),
-                                "data_uri": data_uri,
-                            }),
-                            encoding="utf-8",
-                        )
-                        img_dir.mkdir(parents=True, exist_ok=True)
-                        (img_dir / f"{art.slot_id}.png").write_bytes(raw_bytes)
-                        img_path = f"/api/editions/{edition_id}/images/{art.slot_id}.png"
-                    except Exception:
-                        img_path = None
-
-                    updated_articles.append(
-                        art.model_copy(
-                            update={
-                                "image_path": img_path,
-                                "image_data_uri": data_uri,
-                                "image_caption": caption_text,
-                                "used_placeholder_image": False,
-                            }
-                        )
-                    )
-                    continue
-                except Exception:
-                    placeholder_uri = build_house_svg_illustration(art.topic, art.headline, art.slot_id, is_fallback=True)
-                    notices.append(
-                        f"Illustration for '{art.headline}' fell back to a styled house engraving placeholder."
-                    )
-                    updated_articles.append(
-                        art.model_copy(
-                            update={
-                                "image_path": None,
-                                "image_data_uri": placeholder_uri,
-                                "image_caption": caption_text + " [Styled Placeholder]",
-                                "used_placeholder_image": True,
-                            }
-                        )
-                    )
-                    continue
-
-            # Step 3: Fallback styled placeholder
-            engraving_uri = build_house_svg_illustration(art.topic, art.headline, art.slot_id, is_fallback=False)
+            # Step 3: Fallback unique SVG engraving plate uniquely parameterized for this edition
+            engraving_uri = build_house_svg_illustration(art.topic, art.headline, f"{edition_id}_{art.slot_id}", is_fallback=False)
             updated_articles.append(
                 art.model_copy(
                     update={
@@ -332,14 +328,15 @@ class IllustratorService:
 
         return updated_articles, notices
 
-    async def _call_muse_image_api(self, headline: str, topic: str) -> Tuple[str, bytes]:
+    async def _call_muse_image_api(self, headline: str, topic: str, edition_number: int | None = None) -> Tuple[str, bytes]:
         headers = {
             "Authorization": f"Bearer {settings.MODEL_API_KEY}",
             "Content-Type": "application/json",
         }
+        edition_tag = f" (Broadsheet woodcut plate, Edition #{edition_number})" if edition_number else ""
         payload = {
             "model": settings.MUSE_IMAGE_MODEL,
-            "prompt": f"{HOUSE_STYLE_PREFIX}{topic} — {headline}",
+            "prompt": f"{HOUSE_STYLE_PREFIX}{topic} — {headline}{edition_tag}",
         }
         async with httpx.AsyncClient(timeout=settings.IMAGE_TIMEOUT_SECONDS) as client:
             resp = await client.post(settings.image_generations_url, headers=headers, json=payload)

@@ -182,17 +182,29 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
                             existing_urls.add(src.url)
                     lead_art.mention_count = max(getattr(lead_art, "mention_count", 1), len(lead_art.sources), 6 if "binance" in lead_art.headline.lower() else 2)
 
-                # Replace duplicate/cloned story with an unused verified dispatch from CURATED_TOPIC_DISPATCHES
+                # Replace duplicate/cloned story with an unused verified dispatch matching art.topic
+                from app.services.search_web import get_curated_dispatches_for_topic
                 replacement_raw = None
-                for bucket in CURATED_TOPIC_DISPATCHES:
-                    for raw in bucket["stories"]:
-                        cand_norm = _normalize_headline(raw["headline"])
-                        cand_fp = compute_story_fingerprint(cand_norm, art.topic)
-                        if cand_norm not in seen_headlines_norm and cand_fp not in seen_story_fps and "binance" not in cand_norm:
-                            replacement_raw = raw
-                            break
-                    if replacement_raw:
+                matching_dispatches = get_curated_dispatches_for_topic(art.topic)
+                for raw in matching_dispatches:
+                    cand_norm = _normalize_headline(raw["headline"])
+                    cand_fp = compute_story_fingerprint(cand_norm, art.topic)
+                    if cand_norm not in seen_headlines_norm and cand_fp not in seen_story_fps and "binance" not in cand_norm:
+                        replacement_raw = raw
                         break
+
+                # If no topic-specific replacement exists and we are on Page 1 (general broadsheet front page),
+                # allow checking other buckets; on dedicated section pages (Page > 1), NEVER cross-contaminate!
+                if replacement_raw is None and page.page_number == 1:
+                    for bucket in CURATED_TOPIC_DISPATCHES:
+                        for raw in bucket["stories"]:
+                            cand_norm = _normalize_headline(raw["headline"])
+                            cand_fp = compute_story_fingerprint(cand_norm, raw["headline"])
+                            if cand_norm not in seen_headlines_norm and cand_fp not in seen_story_fps and "binance" not in cand_norm:
+                                replacement_raw = raw
+                                break
+                        if replacement_raw:
+                            break
 
                 if replacement_raw is not None:
                     sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", replacement_raw["verbatim_text"]) if len(s.strip()) > 25]

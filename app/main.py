@@ -1,5 +1,6 @@
 from __future__ import annotations
 from contextlib import asynccontextmanager
+import os
 from pathlib import Path
 from typing import Any, List, Optional
 from fastapi import FastAPI, File, Form, HTTPException, Query, Request, UploadFile
@@ -30,9 +31,12 @@ stt_service = SpeechToTextService()
 async def lifespan(app: FastAPI):
     compile_tokens_css()
     await ensure_sample_archive_seeded(storage=storage)
-    scheduler.start_background_scheduler()
+    # Serverless runtimes freeze background threads; run APScheduler only outside serverless
+    if os.getenv("VERCEL") != "1":
+        scheduler.start_background_scheduler()
     yield
-    scheduler.stop_background_scheduler()
+    if os.getenv("VERCEL") != "1":
+        scheduler.stop_background_scheduler()
 
 
 app = FastAPI(
