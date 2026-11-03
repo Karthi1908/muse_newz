@@ -80,15 +80,22 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
         CURIOSITIES_EPIGRAM_FALLBACKS,
         MUSE_BRIEF_AD_FALLBACKS,
         _encode_static_image_data_uri,
+        select_topic_matched_comic,
     )
     from app.models.schemas import SourceDocument
     from app.services.illustrator import (
         _find_cached_real_image,
         _normalize_headline,
+        build_bespoke_woodcut_png,
         build_house_svg_illustration,
     )
     from app.services.sam_layout_analyzer import compute_grid_fallback_regions
-    from app.services.search_web import CURATED_TOPIC_DISPATCHES, compute_story_fingerprint
+    from app.services.search_web import (
+        CURATED_TOPIC_DISPATCHES,
+        compute_story_fingerprint,
+        get_curated_dispatches_for_topic,
+        is_story_relevant_to_topic,
+    )
 
     changed = False
     cache_dir = settings.DATA_DIR / "demo_cache" / "images"
@@ -161,7 +168,23 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
             fp = compute_story_fingerprint(norm_h, art.topic)
             is_binance_event = ("binance" in norm_h) or ("6.3 billion" in f"{art.headline} {art.deck or ''}".lower())
 
-            if is_binance_event and not binance_heist_seen:
+            is_off_topic = (
+                not art.outside_flag
+                and not is_story_relevant_to_topic(art.headline, " ".join(art.body_paragraphs), art.topic)
+            )
+
+            # Filter out any accidentally merged off-topic secondary sources (e.g. Air India Pilot Academy on an AI article)
+            if not art.outside_flag and len(art.sources) > 1:
+                valid_sources = [
+                    s for idx_s, s in enumerate(art.sources)
+                    if idx_s == 0 or is_story_relevant_to_topic(s.verbatim_text, "", art.topic)
+                ]
+                if len(valid_sources) != len(art.sources):
+                    art.sources = valid_sources
+                    art.mention_count = max(1, len(valid_sources))
+                    changed = True
+
+            if is_binance_event and not binance_heist_seen and not is_off_topic:
                 binance_heist_seen = True
                 if getattr(art, "mention_count", 1) < 6:
                     art.mention_count = 6
@@ -171,9 +194,10 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
                 or fp in seen_story_fps
                 or (is_binance_event and binance_heist_seen)
                 or art.headline.lower().startswith("analysis:")
+                or is_off_topic
             ):
-                # Merge any unique sources into Page 1 lead if it was the same event
-                if edition.pages and edition.pages[0].articles:
+                # Merge any unique sources into Page 1 lead ONLY if it was the same event (not an off-topic story)
+                if not is_off_topic and edition.pages and edition.pages[0].articles:
                     lead_art = edition.pages[0].articles[0]
                     existing_urls = {s.url for s in lead_art.sources}
                     for src in art.sources:
@@ -182,8 +206,7 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
                             existing_urls.add(src.url)
                     lead_art.mention_count = max(getattr(lead_art, "mention_count", 1), len(lead_art.sources), 6 if "binance" in lead_art.headline.lower() else 2)
 
-                # Replace duplicate/cloned story with an unused verified dispatch matching art.topic
-                from app.services.search_web import get_curated_dispatches_for_topic
+                # Replace duplicate/cloned/off-topic story with an unused verified dispatch strictly matching art.topic
                 replacement_raw = None
                 matching_dispatches = get_curated_dispatches_for_topic(art.topic)
                 for raw in matching_dispatches:
@@ -195,7 +218,7 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
 
                 # If no topic-specific replacement exists and we are on Page 1 (general broadsheet front page),
                 # allow checking other buckets; on dedicated section pages (Page > 1), NEVER cross-contaminate!
-                if replacement_raw is None and page.page_number == 1:
+                if replacement_raw is None and page.page_number == 1 and not is_off_topic:
                     for bucket in CURATED_TOPIC_DISPATCHES:
                         for raw in bucket["stories"]:
                             cand_norm = _normalize_headline(raw["headline"])
@@ -218,6 +241,16 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
                         published_date=replacement_raw["published_date"],
                         verbatim_text=replacement_raw["verbatim_text"],
                     )
+                    extra_srcs = [
+                        SourceDocument(
+                            source_id=es["source_id"],
+                            source_name=es["source_name"],
+                            url=es["url"],
+                            published_date=es["published_date"],
+                            verbatim_text=replacement_raw["verbatim_text"],
+                        )
+                        for es in replacement_raw.get("extra_sources", [])
+                    ]
                     new_claims = [
                         ClaimRecord(
                             claim_id=f"{art.slot_id}_c1",
@@ -248,13 +281,14 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
                         update={
                             "headline": replacement_raw["headline"],
                             "deck": replacement_raw["summary"],
+                            "byline": f"By Your Daily Muse {art.topic} Desk",
                             "body_paragraphs": new_body,
-                            "sources": [new_src],
+                            "sources": [new_src, *extra_srcs],
                             "claims": new_claims,
                             "verified_claims_count": len(new_claims),
                             "corrected_claims_count": 0,
                             "removed_claims_count": 0,
-                            "mention_count": int(replacement_raw.get("mention_count", 2)),
+                            "mention_count": int(replacement_raw.get("mention_count", 1 + len(extra_srcs))),
                             "image_data_uri": None,
                             "image_path": None,
                         }
@@ -284,9 +318,17 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
             deduped_page_articles.append(art)
         page.articles = deduped_page_articles
 
-        # 3. Ensure every illustrated article has a unique real woodcut PNG (upgrading any SVG placeholder or duplicate image)
+        # 3. Ensure every illustrated article has a unique real woodcut PNG (upgrading any SVG or missing/duplicate image)
+        page_has_illustration = any(bool(a.image_data_uri or a.image_path) for a in page.articles)
         for a_idx, art in enumerate(page.articles):
-            needs_illustration = bool(art.image_data_uri or art.image_path or art.slot_kind in ("lead", "feature"))
+            if art.used_placeholder_image:
+                continue
+            needs_illustration = bool(
+                art.image_data_uri
+                or art.image_path
+                or art.slot_kind in ("lead", "feature")
+                or (not page_has_illustration and a_idx == 0)
+            )
             if not needs_illustration:
                 continue
 
@@ -295,27 +337,41 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
             uri_hash = hashlib.sha256(current_uri.encode("utf-8")).hexdigest()[:16] if current_uri else ""
 
             if not current_uri or is_svg or uri_hash in used_hashes:
-                found = _find_cached_real_image(art.headline, art.topic, cache_dir, used_hashes)
-                if found:
-                    art.image_data_uri = found[0]
-                    art.used_placeholder_image = False
-                    art.image_caption = (
-                        f"Illustration: Editorial woodcut depiction of {art.headline} "
-                        f"(Your Daily Muse House Illustration Style)."
-                    )
-                    used_hashes.add(found[2])
-                    changed = True
-                elif not current_uri or uri_hash in used_hashes:
-                    art.image_data_uri = build_house_svg_illustration(art.topic, art.headline, art.slot_id)
-                    new_h = hashlib.sha256(art.image_data_uri.encode("utf-8")).hexdigest()[:16]
-                    used_hashes.add(new_h)
-                    changed = True
+                bespoke_uri, bespoke_bytes = build_bespoke_woodcut_png(
+                    topic=art.topic,
+                    headline=art.headline,
+                    slot_id=art.slot_id,
+                    edition_id=edition.edition_id,
+                    cache_dir=cache_dir,
+                )
+                art.image_data_uri = bespoke_uri
+                art.used_placeholder_image = False
+                art.image_caption = (
+                    f"Illustration: Editorial woodcut depiction of {art.headline} "
+                    f"(Your Daily Muse House Illustration Style)."
+                )
+                try:
+                    img_dir = settings.EDITIONS_DIR / edition.edition_id / "images"
+                    img_dir.mkdir(parents=True, exist_ok=True)
+                    (img_dir / f"{art.slot_id}.png").write_bytes(bespoke_bytes)
+                    art.image_path = f"/api/editions/{edition.edition_id}/images/{art.slot_id}.png"
+                except Exception:
+                    pass
+                new_h = hashlib.sha256(bespoke_bytes).hexdigest()[:16]
+                used_hashes.add(new_h)
+                page_has_illustration = True
+                changed = True
             else:
-                # Also extract raw PNG bytes hash from data_uri so _find_cached_real_image knows this PNG is used
                 if current_uri.startswith("data:image/png;base64,"):
                     try:
                         raw_b = base64.b64decode(current_uri.split(",", 1)[1])
                         used_hashes.add(hashlib.sha256(raw_b).hexdigest()[:16])
+                        if not art.image_path:
+                            img_dir = settings.EDITIONS_DIR / edition.edition_id / "images"
+                            img_dir.mkdir(parents=True, exist_ok=True)
+                            (img_dir / f"{art.slot_id}.png").write_bytes(raw_b)
+                            art.image_path = f"/api/editions/{edition.edition_id}/images/{art.slot_id}.png"
+                            changed = True
                     except Exception:
                         used_hashes.add(uri_hash)
                 else:
@@ -330,6 +386,12 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
         )
         new_fillers: List[WhitespaceFillerItem] = []
         target_count = max(len(page.whitespace_fillers), len(expected_regs))
+
+        page_topic = (
+            page.section_flag.replace("Section:", "").strip()
+            if page.section_flag and "Section:" in page.section_flag
+            else ("Front Page" if page.page_number == 1 else (page.articles[0].topic if page.articles else "AI"))
+        )
 
         for r_idx in range(target_count):
             reg = expected_regs[r_idx] if r_idx < len(expected_regs) else expected_regs[-1]
@@ -351,13 +413,20 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
                     f_item = f_item.model_copy(update={"title": clean_t})
                     changed = True
 
-                # Check if this filler duplicates an already-used variant_key or image_path in this edition!
+                # Check if this filler duplicates an already-used variant_key or image_path in this edition
+                # or if a section page comic doesn't match the section's topic!
                 is_dup_filler = (
                     (f_item.variant_key and f_item.variant_key in used_filler_keys)
                     or (f_item.image_path and f_item.image_path in used_filler_paths)
                 )
-                if is_dup_filler:
-                    if f_item.filler_type == "muse_brief_ad":
+                is_mismatched_section_comic = (
+                    page.template == "section"
+                    and f_item.filler_type == "comic_joke"
+                    and any(kw in page_topic.lower() for kw in ("movie", "film", "cinema", "finance", "bank", "market", "crypto"))
+                    and f_item.variant_key not in ("cinema_critic", "market_oracle", "vault_audit")
+                )
+                if is_dup_filler or is_mismatched_section_comic:
+                    if f_item.filler_type == "muse_brief_ad" and not is_mismatched_section_comic:
                         unused_ad = next(
                             (a for a in MUSE_BRIEF_AD_FALLBACKS if a["variant_key"] not in used_filler_keys and a["image_path"] not in used_filler_paths),
                             None,
@@ -377,10 +446,12 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
                             )
                             changed = True
                         else:
-                            # If all 3 house ad illustrations are already used on earlier pages, switch to an unused comic strip!
-                            unused_cm = next(
-                                (c for c in COMIC_TOPIC_FALLBACKS if c["variant_key"] not in used_filler_keys and c["image_path"] not in used_filler_paths),
-                                None,
+                            unused_cm = select_topic_matched_comic(
+                                topic=page_topic,
+                                used_variant_keys=used_filler_keys,
+                                used_paths=used_filler_paths,
+                                edition_number=edition.edition_number,
+                                page_number=page.page_number,
                             )
                             if unused_cm is not None:
                                 f_item = f_item.model_copy(
@@ -398,9 +469,12 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
                                 )
                                 changed = True
                     elif f_item.filler_type == "comic_joke":
-                        unused_cm = next(
-                            (c for c in COMIC_TOPIC_FALLBACKS if c["variant_key"] not in used_filler_keys and c["image_path"] not in used_filler_paths),
-                            None,
+                        unused_cm = select_topic_matched_comic(
+                            topic=page_topic,
+                            used_variant_keys=used_filler_keys,
+                            used_paths=used_filler_paths,
+                            edition_number=edition.edition_number,
+                            page_number=page.page_number,
                         )
                         if unused_cm is not None:
                             f_item = f_item.model_copy(
@@ -431,8 +505,11 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
             else:
                 if reg.size_tier == "compact":
                     ep = next(
-                        (e for e in CURIOSITIES_EPIGRAM_FALLBACKS if e["variant_key"] not in used_filler_keys),
-                        CURIOSITIES_EPIGRAM_FALLBACKS[(page.page_number + r_idx) % len(CURIOSITIES_EPIGRAM_FALLBACKS)],
+                        (e for e in CURIOSITIES_EPIGRAM_FALLBACKS if e["variant_key"] not in used_filler_keys and any(kw in page_topic.lower() for kw in e.get("topic_keywords", []))),
+                        next(
+                            (e for e in CURIOSITIES_EPIGRAM_FALLBACKS if e["variant_key"] not in used_filler_keys),
+                            CURIOSITIES_EPIGRAM_FALLBACKS[(page.page_number + r_idx) % len(CURIOSITIES_EPIGRAM_FALLBACKS)],
+                        ),
                     )
                     used_filler_keys.add(ep["variant_key"])
                     new_fillers.append(
@@ -451,9 +528,12 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
                         )
                     )
                 elif r_idx == 0 and page.template in ("front", "section", "inside"):
-                    cm = next(
-                        (c for c in COMIC_TOPIC_FALLBACKS if c["variant_key"] not in used_filler_keys and c["image_path"] not in used_filler_paths),
-                        COMIC_TOPIC_FALLBACKS[(page.page_number + r_idx) % len(COMIC_TOPIC_FALLBACKS)],
+                    cm = select_topic_matched_comic(
+                        topic=page_topic,
+                        used_variant_keys=used_filler_keys,
+                        used_paths=used_filler_paths,
+                        edition_number=edition.edition_number,
+                        page_number=page.page_number,
                     )
                     used_filler_keys.add(cm["variant_key"])
                     used_filler_paths.add(cm["image_path"])
@@ -502,9 +582,12 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
                             )
                         )
                     else:
-                        cm = next(
-                            (c for c in COMIC_TOPIC_FALLBACKS if c["variant_key"] not in used_filler_keys and c["image_path"] not in used_filler_paths),
-                            COMIC_TOPIC_FALLBACKS[0],
+                        cm = select_topic_matched_comic(
+                            topic=page_topic,
+                            used_variant_keys=used_filler_keys,
+                            used_paths=used_filler_paths,
+                            edition_number=edition.edition_number,
+                            page_number=page.page_number,
                         )
                         used_filler_keys.add(cm["variant_key"])
                         used_filler_paths.add(cm["image_path"])

@@ -52,7 +52,7 @@
       "max_pages": 2,
       "total_articles": 8,
       "outside_topics_count": 1,
-      "illustrated_slots_max": 2,
+      "illustrated_slots_max": 4,
       "window_buffer_hours": 2,
       "no_repeat_lookback_days": 7,
       "allow_follow_ups": false,
@@ -63,7 +63,7 @@
           "section_flag": "Front Page",
           "slots": [
             { "slot_id": "p1_lead", "kind": "lead", "illustrated": true, "outside_topics": false },
-            { "slot_id": "p1_sec_1", "kind": "secondary", "illustrated": false, "outside_topics": false },
+            { "slot_id": "p1_sec_1", "kind": "secondary", "illustrated": true, "outside_topics": false },
             { "slot_id": "p1_sec_2", "kind": "secondary", "illustrated": false, "outside_topics": false },
             { "slot_id": "p1_brief_1", "kind": "brief", "illustrated": false, "outside_topics": false },
             { "slot_id": "p1_outside", "kind": "brief", "illustrated": true, "outside_topics": true }
@@ -74,7 +74,7 @@
           "template": "inside",
           "section_flag": "Inside Dispatches",
           "slots": [
-            { "slot_id": "p2_brief_1", "kind": "brief", "illustrated": false, "outside_topics": false },
+            { "slot_id": "p2_brief_1", "kind": "brief", "illustrated": true, "outside_topics": false },
             { "slot_id": "p2_brief_2", "kind": "brief", "illustrated": false, "outside_topics": false },
             { "slot_id": "p2_brief_3", "kind": "brief", "illustrated": false, "outside_topics": false }
           ]
@@ -88,7 +88,7 @@
       "max_pages": 7,
       "max_articles": 16,
       "outside_topics_count": 1,
-      "illustrated_slots_max": 7,
+      "illustrated_slots_max": 8,
       "fixed_window_days": 7,
       "window_buffer_hours": 2,
       "no_repeat_lookback_days": 28,
@@ -98,7 +98,7 @@
         "section_flag": "The Week's Front Page",
         "slots": [
           { "slot_id": "wk_p1_lead", "kind": "lead", "illustrated": true, "outside_topics": false },
-          { "slot_id": "wk_p1_sec_1", "kind": "secondary", "illustrated": false, "outside_topics": false },
+          { "slot_id": "wk_p1_sec_1", "kind": "secondary", "illustrated": true, "outside_topics": false },
           { "slot_id": "wk_p1_sec_2", "kind": "secondary", "illustrated": false, "outside_topics": false },
           { "slot_id": "wk_p1_brief_1", "kind": "brief", "illustrated": false, "outside_topics": false },
           { "slot_id": "wk_p1_brief_2", "kind": "brief", "illustrated": false, "outside_topics": false }

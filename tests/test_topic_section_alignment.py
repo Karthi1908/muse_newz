@@ -126,3 +126,56 @@ async def test_end_to_end_weekly_build_with_movies_topic_produces_legitimate_mov
         assert "subsea interconnector" not in h_lower
         assert "high-voltage" not in h_lower
         assert "pumped hydro" not in h_lower
+
+    # Verify Movies section has a topic-matched cinema comic and fresh article image
+    movie_feature = next((a for a in movie_page.articles if a.slot_kind == "feature"), movie_page.articles[0])
+    assert movie_feature.image_path.endswith(".png")
+    comic_fillers = [f for f in movie_page.whitespace_fillers if f.filler_type == "comic_joke"]
+    assert len(comic_fillers) >= 1
+    assert any("CINEMA" in f.title.upper() or "70MM" in f.dialogue_or_copy.upper() or "CINEMA" in f.image_path.upper() for f in comic_fillers)
+
+
+def test_per_edition_bespoke_woodcut_freshness_and_topic_matched_comics(tmp_path: Path):
+    """
+    Verifies FR-051, FR-052, FR-053:
+    1. is_story_relevant_to_topic strictly separates Movies, Finance, Crypto, and AI.
+    2. build_bespoke_woodcut_png generates unique, non-reused PNG hashes for every new edition.
+    3. select_topic_matched_comic selects topic-specific comics and rotates dialogues across editions.
+    """
+    import hashlib
+    from app.services.search_web import is_story_relevant_to_topic
+    from app.services.illustrator import build_bespoke_woodcut_png
+    from app.agents.whitespace_agent import select_topic_matched_comic
+
+    assert is_story_relevant_to_topic(
+        "Global Cinema Chains Expand 70mm IMAX and Restored Archival Theatrical Runs",
+        "Theatrical box office and 70mm film prints.",
+        "Movies",
+    )
+    assert not is_story_relevant_to_topic(
+        "Three-Gigawatt Subsea Interconnector Links North Sea Offshore Wind to Industrial Grid",
+        "HVDC subsea cable.",
+        "Movies",
+    )
+    assert not is_story_relevant_to_topic(
+        "Compiler-Guided Structured Outputs Cut Enterprise Inference Latency by 38 Percent",
+        "Token consumption drops 38 percent.",
+        "Finance",
+    )
+
+    p1 = build_bespoke_woodcut_png("Movies", "Global Cinema Chains Expand 70mm Runs", "wk_sec_3_feature", "ed_0101_weekly", tmp_path)
+    p2 = build_bespoke_woodcut_png("Movies", "Global Cinema Chains Expand 70mm Runs", "wk_sec_3_feature", "ed_0102_weekly", tmp_path)
+    assert p1.exists() and p2.exists()
+    h1 = hashlib.sha256(p1.read_bytes()).hexdigest()[:16]
+    h2 = hashlib.sha256(p2.read_bytes()).hexdigest()[:16]
+    assert h1 != h2, "Every new edition must generate a fresh woodcut image hash"
+
+    c_movie_1 = select_topic_matched_comic("Section: Movies", ["70mm Cinema"], set(), set(), edition_number=15)
+    c_movie_2 = select_topic_matched_comic("Section: Movies", ["70mm Cinema"], set(), set(), edition_number=16)
+    assert c_movie_1["key"] == "cinema_critic"
+    assert "comic_cinema_critic.png" in c_movie_1["image_path"]
+    assert c_movie_1["dialogue"] != c_movie_2["dialogue"], "Comic dialogue must update across editions"
+
+    c_fin = select_topic_matched_comic("Section: Finance", ["Central Bank Clearing"], set(), set(), edition_number=16)
+    assert c_fin["key"] == "market_oracle"
+    assert "comic_market_oracle.png" in c_fin["image_path"]

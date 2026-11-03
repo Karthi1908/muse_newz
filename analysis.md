@@ -81,9 +81,18 @@
 | **FR-042** | Single broadsheet design tokens, labelled as satire or ad, HTML-escaped | §4.7, §4.8 | `CHK-R31` | `T036`, `T037` | `T038` |
 | **FR-043** | Full live generation of comic dialogue + woodcut illustration via `muse-image-1.0` | §4.7 | `CHK-R32` | `T036`, `T039` | `T038` |
 | **FR-044** | Explicit `15s` timeout, CSS grid fallback, and cached demo fixtures | §4.6, §4.7 | `CHK-R32` | `T035`, `T039` | `T038` |
+| **FR-045** | Most-mentioned news promoted to Front-Page Centrepiece with woodcut & source badge | §4.3, §4.8 | `CHK-R33` | `T040` | `T044` (`SC-015`) |
+| **FR-046** | Zero duplicate news stories & zero duplicate images across edition | §4.3, §4.5 | `CHK-R34` | `T041` | `T044` (`SC-014`) |
+| **FR-047** | Unified Web, Print/PDF & Standalone HTML alignment (`layout-horizontal`/`vertical`) | §4.8 | `CHK-R35` | `T042` | `T044` (`SC-016`) |
+| **FR-048** | Configurable `geographic_preference` persisted in SQLite & shown in Masthead | §3, §4.2 | `CHK-R36` | `T043` | `T044` (`SC-016`) |
+| **FR-049** | Dynamic reader-named masthead (`The [Name] Courier`, fallback `The Muse Courier`) | §3, §4.8 | `CHK-R37` | `T045` | `T045` (`SC-017`) |
+| **FR-050** | Personalized masthead tagline (`“Made for [Name]. Checked before print.”`) | §3, §4.8 | `CHK-R37` | `T045` | `T045` (`SC-017`) |
+| **FR-051** | Strict topic & section semantic alignment (`is_story_relevant_to_topic`, zero off-topic contamination) | §4.2, §4.3 | `CHK-R38` | `T046` | `T046` (`SC-018`) |
+| **FR-052** | Per-edition fresh woodcut PNG generation (`build_bespoke_woodcut_png`) & expanded article illustrations | §4.5, §4.8 | `CHK-R39` | `T047` | `T047` (`SC-019`) |
+| **FR-053** | Topic-matched comic strips (`cinema_critic`, `market_oracle`, `vault_audit`) & updated edition jokes | §4.7, §4.8 | `CHK-R40` | `T048` | `T048` (`SC-020`) |
 
 ---
 
 ## 4. Readiness Gate Conclusion
 **Status: 100% READY FOR IMPLEMENTATION (`/speckit-implement`)**  
-All specifications (`constitution.md`, `spec.md`, `plan.md`, `checklists/requirements.md`, `tasks.md`, and `analysis.md`) are mutually consistent, fully traced across all 50 requirements (`FR-001`–`FR-050`), 17 resolved clarifications (`Decisions #1`–`#17`), and 17 success criteria (`SC-001`–`SC-017`), with zero outstanding ambiguities or blocking findings.
+All specifications (`constitution.md`, `spec.md`, `plan.md`, `checklists/requirements.md`, `tasks.md`, and `analysis.md`) are mutually consistent, fully traced across all 53 requirements (`FR-001`–`FR-053`), 20 resolved clarifications (`Decisions #1`–`#20`), and 20 success criteria (`SC-001`–`SC-020`), with zero outstanding ambiguities or blocking findings.

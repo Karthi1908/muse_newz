@@ -104,15 +104,15 @@ def _find_cached_real_image(
     clean_target_head = _normalize_headline(headline)
 
     for mpath in cache_dir.glob("*.json"):
-        if mpath.name.startswith("ad_muse_brief_"):
-            continue  # Exclude house ads from news article illustrations
+        if mpath.name.startswith("ad_muse_brief_") or mpath.name.startswith("comic_"):
+            continue  # Exclude house ads and comic strips from news article illustrations
         png_path = cache_dir / f"{mpath.stem}.png"
         if not png_path.exists():
             continue
         try:
             meta = json.loads(mpath.read_text(encoding="utf-8"))
-            if meta.get("topic") == "House Advertisement":
-                continue  # Skip any advertisement assets
+            if meta.get("topic") in ("House Advertisement", "Satirical Editorial Comic"):
+                continue  # Skip advertisement and comic assets
             cached_headline = meta.get("headline", "")
             cached_topic = meta.get("topic", "")
             cached_norm = _normalize_headline(cached_headline)
@@ -123,9 +123,10 @@ def _find_cached_real_image(
             if content_hash in used_hashes:
                 continue
 
-            # Calculate match score
+            # Calculate match score with strict semantic topic integrity
+            from app.services.search_web import topic_matches_bucket
             score = 0.0
-            if clean_target_head == cached_norm:
+            if clean_target_head and clean_target_head == cached_norm:
                 score = 10.0
             else:
                 cached_tokens = _extract_domain_tokens(cached_headline)
@@ -133,12 +134,13 @@ def _find_cached_real_image(
                 all_toks = target_tokens | cached_tokens
                 jaccard = (len(common) / len(all_toks)) if all_toks else 0.0
 
-                if len(common) >= 3 or jaccard >= 0.40:
+                if len(common) >= 3 and jaccard >= 0.35:
                     score = 5.0 + jaccard
-                elif topic and cached_topic and (topic.lower() in cached_topic.lower() or cached_topic.lower() in topic.lower()):
-                    score = 2.0 + jaccard
-                elif len(common) >= 2:
-                    score = 1.0 + jaccard
+                elif topic and cached_topic and (
+                    topic_matches_bucket(topic, [cached_topic])
+                    or topic_matches_bucket(cached_topic, [topic])
+                ):
+                    score = 2.5 + jaccard
 
             if score > 0.0:
                 meta["_raw_bytes"] = raw_bytes
@@ -155,6 +157,92 @@ def _find_cached_real_image(
             return f"data:image/png;base64,{b64}", best_meta["_raw_bytes"], best_meta["_content_hash"]
 
     return None
+
+
+def build_bespoke_woodcut_png(
+    topic: str,
+    headline: str,
+    slot_id: str,
+    edition_id: str,
+    cache_dir: Path | None = None,
+) -> Tuple[str, bytes]:
+    """
+    Generates a brand-new, edition-specific Victorian broadsheet woodcut PNG illustration
+    tailored to the article's topic, headline, slot_id, and edition_id (Decision #19, FR-052, SC-019).
+    Composites a topic-matched woodcut etching plate with a unique framing crop and engraved
+    broadsheet plate cartouche so every new edition has fresh, non-repeating PNG article images.
+    """
+    import io
+    from PIL import Image, ImageDraw, ImageOps
+
+    c_dir = cache_dir or (settings.DATA_DIR / "demo_cache" / "images")
+    t_lower = (topic or "").strip().lower()
+    h_lower = (headline or "").strip().lower()
+    seed_bytes = hashlib.sha256(f"{edition_id}|{slot_id}|{headline}|{topic}".encode("utf-8")).digest()
+    seed_int = int.from_bytes(seed_bytes[:4], "big")
+
+    # Select topic-appropriate woodcut base plates
+    if any(k in t_lower or k in h_lower for k in ("movie", "film", "cinema", "theatrical", "box office", "70mm", "festival", "hollywood", "bollywood", "ramayana")):
+        pool_stems = ["movies_70mm_cinema", "movies_film_festival"]
+    elif any(k in t_lower or k in h_lower for k in ("binance", "heist", "crypto", "bitcoin", "ethereum", "blockchain", "zk", "zero-knowledge", "lattice", "token", "ledger")):
+        pool_stems = ["binance_crypto_heist_6b", "crypto_zk_settlement"] if "binance" in h_lower else ["crypto_zk_settlement", "binance_crypto_heist_6b"]
+    elif any(k in t_lower or k in h_lower for k in ("finance", "financial", "bank", "banking", "treasury", "sovereign", "market", "fintech", "ipo", "equities", "swap")):
+        pool_stems = ["finance_central_bank", "finance_fintech_ipo"]
+    elif any(k in t_lower or k in h_lower for k in ("ai", "agent", "agentic", "model", "neural", "inference", "compute", "cloud")):
+        pool_stems = ["4cb62ff6913707d3", "bae76e76044c7d50"]
+    elif any(k in t_lower or k in h_lower for k in ("energy", "grid", "battery", "sodium", "solar", "wind", "hvdc", "interconnector", "hydro")):
+        pool_stems = ["clean_energy_sodium_battery", "hvdc_interconnector"]
+    elif any(k in t_lower or k in h_lower for k in ("space", "orbit", "satellite", "laser", "rocket", "launch")):
+        pool_stems = ["space_laser_optical_mesh"]
+    elif any(k in t_lower or k in h_lower for k in ("semiconductor", "chip", "wafer", "fab", "substrate", "lithography")):
+        pool_stems = ["999b39eeba586362"]
+    else:
+        pool_stems = ["8b7dce16f38a508b", "9dbafebf93066612", "4cb62ff6913707d3"]
+
+    chosen_stem = pool_stems[seed_int % len(pool_stems)]
+    base_png = c_dir / f"{chosen_stem}.png"
+
+    canvas_w, canvas_h = 720, 420
+    canvas = Image.new("RGB", (canvas_w, canvas_h), (242, 236, 224))  # Warm newsprint #F2ECE0
+
+    if base_png.exists():
+        try:
+            src_img = Image.open(base_png).convert("RGB")
+            if (seed_int >> 3) % 2 == 1 and "binance" not in chosen_stem:
+                src_img = ImageOps.mirror(src_img)
+            sw, sh = src_img.size
+            # Unique crop window seeded by edition + slot + headline
+            crop_scale = 0.86 + ((seed_int % 11) * 0.01)
+            cw, ch = int(sw * crop_scale), int(sh * crop_scale)
+            max_dx = max(1, sw - cw)
+            max_dy = max(1, sh - ch)
+            dx = (seed_int >> 5) % max_dx
+            dy = (seed_int >> 9) % max_dy
+            cropped = src_img.crop((dx, dy, dx + cw, dy + ch)).resize((canvas_w - 28, canvas_h - 64), Image.Resampling.LANCZOS)
+            canvas.paste(cropped, (14, 14))
+        except Exception:
+            pass
+
+    draw = ImageDraw.Draw(canvas)
+    ink = (20, 20, 19)
+    paper = (247, 243, 232)
+
+    # Outer & inner Victorian broadsheet double-rule engraving frame
+    draw.rectangle([4, 4, canvas_w - 5, canvas_h - 5], outline=ink, width=3)
+    draw.rectangle([12, 12, canvas_w - 13, canvas_h - 50], outline=ink, width=1)
+
+    # Engraved Plate Footer Band (makes every edition/article plate cryptographically & visually unique)
+    draw.rectangle([12, canvas_h - 46, canvas_w - 13, canvas_h - 12], fill=paper, outline=ink, width=1)
+    plate_label = f"ENGRAVING PLATE {edition_id.upper()} · {slot_id.upper()} · {(topic or 'DISPATCH').upper()[:22]}"
+    head_excerpt = (headline or "")[:68] + ("..." if len(headline or "") > 68 else "")
+    draw.text((22, canvas_h - 41), plate_label, fill=ink)
+    draw.text((22, canvas_h - 26), head_excerpt, fill=(61, 58, 54))
+
+    buf = io.BytesIO()
+    canvas.save(buf, format="PNG", optimize=True)
+    png_bytes = buf.getvalue()
+    b64 = base64.b64encode(png_bytes).decode("ascii")
+    return f"data:image/png;base64,{b64}", png_bytes
 
 
 def build_house_svg_illustration(topic: str, headline: str, slot_id: str, is_fallback: bool = False) -> str:
@@ -313,13 +401,29 @@ class IllustratorService:
                 )
                 continue
 
-            # Step 3: Fallback unique SVG engraving plate uniquely parameterized for this edition
-            engraving_uri = build_house_svg_illustration(art.topic, art.headline, f"{edition_id}_{art.slot_id}", is_fallback=False)
+            # Step 3: Generate a brand-new, edition-specific bespoke woodcut PNG plate for this article
+            bespoke_uri, bespoke_bytes = build_bespoke_woodcut_png(
+                topic=art.topic,
+                headline=art.headline,
+                slot_id=art.slot_id,
+                edition_id=edition_id,
+                cache_dir=cache_dir,
+            )
+            content_hash = hashlib.sha256(bespoke_bytes).hexdigest()[:16]
+            used_image_hashes.add(content_hash)
+            try:
+                img_dir.mkdir(parents=True, exist_ok=True)
+                slot_png = img_dir / f"{art.slot_id}.png"
+                slot_png.write_bytes(bespoke_bytes)
+                img_path = f"/api/editions/{edition_id}/images/{art.slot_id}.png"
+            except Exception:
+                img_path = None
+
             updated_articles.append(
                 art.model_copy(
                     update={
-                        "image_path": None,
-                        "image_data_uri": engraving_uri,
+                        "image_path": img_path,
+                        "image_data_uri": bespoke_uri,
                         "image_caption": caption_text,
                         "used_placeholder_image": False,
                     }

@@ -144,7 +144,7 @@ class EditionPipelineRunner:
             message=f"Stage 1/5: Parallel Beat Reporters researching {len(reader_snapshot.topics)} topic(s)...",
             attempt=attempt,
         )
-        max_cands = 4 if format_name == "weekly" else 3
+        max_cands = 5 if format_name == "weekly" else 4
         raw_pool = await self.reporters.gather_candidate_pool(
             topics=reader_snapshot.topics,
             format_name=format_name,  # type: ignore[arg-type]
@@ -227,9 +227,16 @@ class EditionPipelineRunner:
 
         page_articles_count: dict[int, int] = {}
         page_templates: dict[int, str] = {}
+        page_section_topics: dict[int, str] = {}
         for slot in manifest.slot_assignments:
             page_articles_count[slot.page_number] = page_articles_count.get(slot.page_number, 0) + 1
             page_templates[slot.page_number] = slot.page_template
+            if slot.page_number not in page_section_topics and not slot.outside_topics:
+                page_section_topics[slot.page_number] = slot.topic
+
+        page_headlines_map: dict[int, list[str]] = {}
+        for art in illustrated_articles:
+            page_headlines_map.setdefault(art.page_number, []).append(art.headline)
 
         for p_num, tmpl in page_templates.items():
             count = page_articles_count.get(p_num, 0)
@@ -246,6 +253,9 @@ class EditionPipelineRunner:
                     regions=regions,
                     edition_topics=reader_snapshot.topics,
                     used_variant_keys=used_variant_keys,
+                    section_topic=page_section_topics.get(p_num),
+                    edition_number=ed_num,
+                    page_headlines=page_headlines_map.get(p_num, []),
                 )
                 if page_fillers:
                     fillers_by_page[p_num] = page_fillers

@@ -52,13 +52,16 @@ def extract_event_signature(story: CandidateStory) -> Tuple[Set[str], Set[str], 
         if words & kw_set:
             event_categories.add(cat)
 
-    # 3. Extract distinctive entity/subject tokens from the headline
+    # 3. Extract distinctive entity/subject tokens from the headline (excluding geographic & generic terms)
     generic_news_words = {
         "the", "and", "for", "with", "from", "into", "over", "after", "new", "report", "reports",
         "shows", "alleged", "amid", "says", "tied", "launches", "announces", "releases", "global",
         "system", "systems", "models", "model", "company", "market", "industry", "update", "follow",
         "analysis", "study", "data", "first", "major", "record", "billion", "million", "trillion",
-        "crypto", "hackers", "steal", "theft", "suspends", "withdrawals",
+        "crypto", "hackers", "steal", "theft", "suspends", "withdrawals", "india", "indian",
+        "south", "asia", "asian", "north", "central", "east", "west", "america", "american",
+        "europe", "european", "united", "states", "kingdom", "world", "international", "national",
+        "regional", "region", "across", "brings", "action", "strategic", "establishes", "largest",
     }
     headline_tokens = set(re.findall(r"[a-z]{4,}", story.headline.lower())) - generic_news_words
     return headline_tokens, magnitudes, event_categories
@@ -90,8 +93,8 @@ def is_same_underlying_event(a: CandidateStory, b: CandidateStory) -> bool:
     # Same numeric scale (e.g. "6b") + same event category (e.g. "cyber_heist") in same topic domain
     if shared_magnitudes and shared_categories and ("cyber_heist" in shared_categories):
         return True
-    # 3+ distinctive headline entities in common
-    if len(shared_entities) >= 3:
+    # 3+ distinctive non-geographic headline entities in common with meaningful title overlap
+    if len(shared_entities) >= 3 and jaccard_similarity(sh_a, sh_b) >= 0.30:
         return True
 
     return False

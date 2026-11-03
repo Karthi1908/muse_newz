@@ -255,10 +255,9 @@ CURATED_TOPIC_DISPATCHES: List[Dict[str, Any]] = [
     },
     {
         "keywords": [
-            "finance", "financial", "crypto", "cryptocurrency", "bitcoin", "blockchain",
-            "fintech", "defi", "ledger", "banking", "bank", "treasury", "market",
-            "markets", "economy", "economic", "macro", "debt", "bond", "capital",
-            "sovereign debt", "interest rate", "equities", "exchange",
+            "crypto", "cryptocurrency", "bitcoin", "ethereum", "solana", "blockchain",
+            "defi", "web3", "digital asset", "digital assets", "token", "stablecoin",
+            "binance", "on-chain", "cryptographic",
         ],
         "stories": [
             {
@@ -290,40 +289,107 @@ CURATED_TOPIC_DISPATCHES: List[Dict[str, Any]] = [
                 ),
             },
             {
-                "headline": "Zero-Knowledge Succinct Proofs Verify Cross-Border Wholesale Settlement in Under Two Seconds",
-                "summary": "A multinational banking consortium demonstrated mathematical settlement finality across 42 financial institutions without disclosing counterparty balances.",
+                "headline": "Zero-Knowledge Succinct Proofs Verify Cross-Border Digital Asset Settlement in Under Two Seconds",
+                "summary": "A multinational blockchain clearing consortium demonstrated mathematical settlement finality across 42 institutional nodes without exposing wallet balances.",
                 "source_name": "Journal of Financial Cryptography & Ledger Architectures",
                 "url": "https://financial-crypto.example.org/2026/10/zk-proofs-wholesale-settlement-speed",
                 "published_date": "2026-10-30",
                 "verbatim_text": (
-                    "On October 30, 2026, the International Ledger Standardization Forum published operational benchmark results from Project Veritas, evaluating recursive STARK-based zero-knowledge proofs for interbank payment clearing across 42 financial institutions. "
-                    "The network processed 18,400 bilateral payments totaling 4.6 billion Euros with a median verification latency of 1.84 seconds per batch, eliminating counterparty settlement exposure. "
-                    "Cryptographic verifiers proved that valid liquidity reserves existed in each originating vault while concealing exact transaction amounts, commercial counterpart identities, and order-book routing paths from observers. "
+                    "On October 30, 2026, the International Ledger Standardization Forum published operational benchmark results from Project Veritas, evaluating recursive STARK-based zero-knowledge proofs for on-chain digital asset clearing across 42 institutional validators. "
+                    "The network processed 18,400 bilateral settlements totaling 4.6 billion Euros with a median cryptographic verification latency of 1.84 seconds per batch, eliminating counterparty settlement exposure. "
+                    "Cryptographic verifiers proved that valid liquidity reserves existed in each originating custody vault while concealing exact transaction amounts, wallet identities, and order-book routing paths from external observers. "
                     "Independent auditors from the Basel Institute confirmed zero mathematical proof collisions across 1.2 million simulated stress-test executions."
                 ),
             },
             {
-                "headline": "Hardware Security Modules with Post-Quantum Lattice Keys Deployed Across High-Throughput Clearinghouses",
-                "summary": "Central depository trials achieved 280,000 post-quantum digital signatures per minute under simulated network stress.",
-                "source_name": "Fintech Infrastructure & Security Review",
+                "headline": "Hardware Security Modules with Post-Quantum Lattice Keys Deployed Across Institutional Crypto Custody Vaults",
+                "summary": "Cold-storage depository trials achieved 280,000 post-quantum digital signatures per minute under simulated network stress.",
+                "source_name": "Cryptographic Infrastructure & Security Review",
                 "url": "https://fintech-review.example.org/2026/10/pq-lattice-clearinghouse-deployment",
                 "published_date": "2026-10-28",
                 "verbatim_text": (
-                    "Security telemetry released on October 28, 2026 by the Continental Clearing Alliance showed that specialized cryptographic coprocessors running Module-Lattice-Based Key Encapsulation (ML-KEM) achieved 284,000 authenticated trade instructions per minute during peak market hours. "
-                    "The migration from traditional elliptic curve signatures to post-quantum lattice primitives added just 3.2 milliseconds of processing latency per asset swap. "
-                    "Chief Information Security Officer Elena Rostova confirmed that over 120 member banks completed sandbox interoperability trials without software configuration rollbacks."
+                    "Security telemetry released on October 28, 2026 by the Digital Asset Custody Alliance showed that specialized cryptographic coprocessors running Module-Lattice-Based Key Encapsulation (ML-KEM) achieved 284,000 authenticated blockchain trade signatures per minute during peak market hours. "
+                    "The migration from traditional elliptic curve signatures to post-quantum lattice primitives added just 3.2 milliseconds of signing latency per cross-chain asset swap. "
+                    "Chief Information Security Officer Elena Rostova confirmed that over 120 institutional digital asset custodians completed sandbox interoperability trials without software configuration rollbacks."
                 ),
             },
+            {
+                "headline": "Tokenized Sovereign Treasury Pools Surpass $240 Billion in On-Chain Automated Repo Settlement",
+                "summary": "Regulated smart-contract liquidity pools cut collateral mobilization times from 48 hours to 90 seconds across global digital asset desks.",
+                "source_name": "Distributed Ledger & Custody Chronicle",
+                "url": "https://ledger-chronicle.example.org/2026/10/tokenized-treasury-repo-settlement-240b",
+                "published_date": "2026-10-27",
+                "verbatim_text": (
+                    "On-chain settlement telemetry released on October 27, 2026 by the Global Digital Asset Clearinghouse confirmed that tokenized sovereign treasury bill pools surpassed $240 billion in total value locked across regulated permissioned ledgers. "
+                    "Automated delivery-versus-payment smart contracts reduced intraday repo collateral settlement times from 48 hours down to 90 seconds while enforcing cryptographic proof-of-reserve attestations at every block interval. "
+                    "Institutional treasury desks reported a 34% reduction in idle cash buffers across Asian, European, and North American trading hours."
+                ),
+            },
+        ],
+    },
+    {
+        "keywords": [
+            "finance", "financial", "fintech", "banking", "bank", "treasury", "market",
+            "markets", "economy", "economic", "macro", "debt", "bond", "bonds", "capital",
+            "sovereign debt", "interest rate", "equities", "exchange", "ipo", "stocks",
+        ],
+        "stories": [
             {
                 "headline": "Global Central Banking Accord Establishes Unified Liquidity Backstop for Cross-Border Sovereign Debt Settlement",
                 "summary": "Finance ministries and central banks across 24 nations finalized a $1.2 trillion multilateral swap facility to stabilize foreign exchange settlement during market dislocations.",
                 "source_name": "International Monetary and Banking Dispatch",
                 "url": "https://monetary-dispatch.example.org/2026/10/central-bank-sovereign-liquidity-accord",
                 "published_date": "2026-10-29",
+                "mention_count": 4,
+                "extra_sources": [
+                    {
+                        "source_id": "S2",
+                        "source_name": "Basel Sovereign Clearing Review",
+                        "url": "https://basel-review.example.org/2026/10/29/multilateral-swap-accord-liquidity",
+                        "published_date": "2026-10-29",
+                    }
+                ],
                 "verbatim_text": (
                     "Central bank governors meeting in Basel on October 29, 2026 ratified a $1.2 trillion standing multilateral currency swap arrangement designed to guarantee dollar, euro, and yen liquidity during sovereign debt auctions. "
                     "The unified framework establishes automated bilateral clearing conduits between 24 reserve banks, reducing settlement failure risks in secondary bond markets by 85%. "
                     "Treasury officials noted that real-time margin netting will lower daily collateral requirements for participating commercial banks by $72 billion while preserving conservative capital buffers."
+                ),
+            },
+            {
+                "headline": "South Asian and Emerging Market Banking & Fintech Listings Lead $68 Billion Equity Issuance Surge",
+                "summary": "Institutional exchanges in Mumbai, Singapore, and London recorded a 41% rebound in initial public offerings led by profitable digital payments and credit-scoring platforms.",
+                "source_name": "Global Capital Markets & Equities Gazette",
+                "url": "https://capital-gazette.example.org/2026/10/fintech-ipo-issuance-surge-q4",
+                "published_date": "2026-10-30",
+                "mention_count": 3,
+                "verbatim_text": (
+                    "Quarterly issuance data published on October 30, 2026 by the Global Capital Markets Observatory showed that initial public offerings across Mumbai, Singapore, and London raised $68.4 billion in Q4 2026, marking a 41% increase over the prior year. "
+                    "Enterprise fintech and commercial banking infrastructure issuers accounted for 38% of total equity volume, with institutional order books oversubscribed by an average factor of 6.4 times. "
+                    "Lead underwriters noted that strict profitability covenants and audited recurring revenue metrics restored sovereign wealth fund participation across emerging market bourses."
+                ),
+            },
+            {
+                "headline": "Automated Real-Time Treasury Clearing Cuts Institutional Foreign-Exchange Settlement Exposure by 78%",
+                "summary": "Synchronized central bank payment-versus-payment corridors eliminated overnight Herstatt settlement risk across 19 major currency pairs.",
+                "source_name": "Treasury & Foreign Exchange Review",
+                "url": "https://treasury-fx-review.example.org/2026/10/realtime-fx-clearing-exposure-cut",
+                "published_date": "2026-10-28",
+                "verbatim_text": (
+                    "Operational audits released on October 28, 2026 by the Foreign Exchange Settlement Committee demonstrated that synchronized payment-versus-payment (PvP) clearing corridors reduced interbank FX settlement risk by 78% across $4.1 trillion in daily turnover. "
+                    "By linking real-time gross settlement engines across 19 central banks, commercial treasury desks compressed cross-currency settlement windows from 24 hours down to 4.2 seconds. "
+                    "Participating Tier-1 banks reported $19 billion in freed intraday liquidity and zero failed sovereign bond coupon settlements during October."
+                ),
+            },
+            {
+                "headline": "Basel Sovereign Margin Framework Unlocks $94 Billion in Tier-1 Commercial Banking & Infrastructure Lending",
+                "summary": "Updated capital risk-weight calibrations enabled commercial lenders to expand long-term industrial and trade-finance credit lines without raising leverage ratios.",
+                "source_name": "Journal of Banking Regulation & Credit",
+                "url": "https://banking-regulation.example.org/2026/10/basel-margin-infrastructure-lending",
+                "published_date": "2026-10-27",
+                "verbatim_text": (
+                    "Regulatory filings compiled on October 27, 2026 by the International Banking Supervision Board confirmed that revised Basel sovereign guarantee risk-weights unlocked $94 billion in new commercial infrastructure and trade-finance credit capacity. "
+                    "Across 64 audited commercial banks in Europe, North America, and South Asia, default rates on revenue-backed industrial project loans remained below 0.38% over a 36-month observation window. "
+                    "Credit analysts projected that lower capital charges on verified trade receivables will reduce borrowing spreads for mid-market manufacturers by 45 basis points."
                 ),
             },
         ],
@@ -412,10 +478,11 @@ def topic_matches_bucket(topic: str, bucket_keywords: List[str]) -> bool:
         if len(kw_clean) >= 3 and (kw_clean in t_clean or t_clean in kw_clean):
             return True
 
-    # High-precision semantic synonym sets
+    # High-precision semantic synonym sets (strictly separating Finance, Crypto, Movies, AI, Energy, etc.)
     synonym_clusters = [
-        {"movie", "movies", "film", "films", "cinema", "cinematic", "entertainment", "hollywood", "theatrical", "screenplay"},
-        {"finance", "financial", "market", "markets", "economy", "economic", "crypto", "banking", "treasury", "fintech"},
+        {"movie", "movies", "film", "films", "cinema", "cinematic", "entertainment", "hollywood", "bollywood", "theatrical", "screenplay", "box office"},
+        {"finance", "financial", "market", "markets", "economy", "economic", "banking", "treasury", "fintech", "equities", "bonds", "ipo"},
+        {"crypto", "cryptocurrency", "bitcoin", "ethereum", "solana", "blockchain", "defi", "web3", "stablecoin", "token", "ledger"},
         {"ai", "artificial intelligence", "machine learning", "agent", "llm", "neural", "deep learning"},
         {"clean tech", "clean energy", "energy", "grid", "solar", "battery", "wind", "renewable"},
         {"semiconductor", "semiconductors", "chip", "chips", "hardware", "lithography"},
@@ -427,6 +494,103 @@ def topic_matches_bucket(topic: str, bucket_keywords: List[str]) -> bool:
             if any(term in kw.lower() for kw in bucket_keywords for term in cluster):
                 return True
     return False
+
+
+def is_story_relevant_to_topic(headline: str, text: str, topic: str) -> bool:
+    """
+    Deterministic semantic topic verifier (Decision #18, FR-051, SC-018).
+    Guarantees that any story assigned to `topic` (or a Section page for `topic`)
+    genuinely belongs to that subject domain and is never an off-topic story from
+    another domain (e.g., preventing Energy/HVDC/Sodium-Battery stories from appearing
+    in `Movies`, `Finance`, or `crypto`, or Film Festival stories from appearing in `Finance`).
+    """
+    t_clean = (topic or "").strip().lower()
+    if not t_clean or "outside" in t_clean:
+        return True
+
+    combined = f"{headline} {text or ''}".lower()
+    head_lower = headline.lower()
+    words = set(re.findall(r"[a-z0-9]{2,}", combined))
+    head_words = set(re.findall(r"[a-z0-9]{2,}", head_lower))
+
+    movie_terms = {
+        "movie", "movies", "film", "films", "cinema", "cinemas", "cinematic",
+        "theatrical", "director", "directors", "actor", "actors", "actress",
+        "hollywood", "bollywood", "screenplay", "festival", "cannes", "oscars",
+        "academy", "screening", "screenings", "premiere", "studio", "studios",
+        "blockbuster", "celluloid", "70mm", "35mm", "imax", "nitocel", "ramayana",
+        "berlinale", "tiff", "theatre", "theaters", "subtitled", "cinematography",
+    }
+    energy_only_terms = {
+        "hvdc", "interconnector", "subsea", "sodium", "perovskite", "pumped",
+        "megawatt", "gigawatt", "curtailment", "peaker", "rooftop",
+    }
+    finance_terms = {
+        "finance", "financial", "bank", "banking", "banks", "market", "markets",
+        "stock", "stocks", "equity", "equities", "bond", "bonds", "treasury",
+        "sovereign", "debt", "ipo", "fintech", "capital", "fund", "funds",
+        "invest", "investment", "investor", "investors", "monetary", "clearing",
+        "settlement", "liquidity", "currency", "forex", "exchange", "gdp",
+        "inflation", "revenue", "earnings", "basel", "swap", "lending", "credit",
+        "listings", "underwriters", "collateral",
+    }
+    crypto_terms = {
+        "crypto", "cryptocurrency", "bitcoin", "btc", "ethereum", "eth", "solana",
+        "binance", "blockchain", "defi", "token", "tokenized", "tokens", "stablecoin",
+        "stablecoins", "wallet", "wallets", "validator", "validators", "multisig",
+        "cryptographic", "lattice", "ledger", "ledgers", "heist", "web3", "coinbase",
+        "custody", "stark",
+    }
+    ai_terms = {
+        "ai", "agent", "agents", "agentic", "llm", "llms", "neural", "inference",
+        "openai", "anthropic", "gemini", "claude", "gpt", "copilot", "compute",
+        "benchmark", "benchmarks", "decoding", "autonomous", "algorithm",
+        "machine", "learning", "models", "model",
+    }
+
+    # 1. Movies / Film / Cinema check
+    if any(k in t_clean for k in ("movie", "film", "cinema", "entertainment", "hollywood", "bollywood", "theatrical")):
+        if words & energy_only_terms:
+            return False
+        return bool((words & movie_terms) or "box office" in combined)
+
+    # 2. Finance / Markets / Banking check
+    if any(k in t_clean for k in ("finance", "financial", "market", "economy", "banking", "fintech", "treasury", "equities")):
+        if words & energy_only_terms:
+            return False
+        # Reject AI compiler/JSON/agent benchmark articles and film/cinema articles
+        if head_words & {"compiler", "json", "schema", "agent", "agents", "multi-agent", "llm", "neural", "inference", "speculative", "film", "films", "cinema", "cinemas", "movie", "movies", "ramayana", "berlinale", "tiff"}:
+            if not (head_words & finance_terms):
+                return False
+        return bool(head_words & (finance_terms | {"crypto", "binance", "settlement", "clearing", "heist", "ledger"}))
+
+    # 3. Crypto / Blockchain check
+    if any(k in t_clean for k in ("crypto", "bitcoin", "blockchain", "defi", "web3", "ethereum", "token")):
+        if words & energy_only_terms:
+            return False
+        if head_words & {"compiler", "json", "schema", "film", "films", "cinema", "cinemas", "movie", "movies"}:
+            return False
+        return bool((head_words & crypto_terms) or "zero-knowledge" in head_lower or "on-chain" in combined or "digital asset" in combined or "post-quantum" in head_lower)
+
+    # 4. AI / Agentic Systems check
+    if t_clean == "ai" or any(k in t_clean for k in ("artificial intelligence", "agent", "machine learning", "llm", "neural")):
+        if words & energy_only_terms:
+            return False
+        if "pilot academy" in head_lower or "flying school" in head_lower:
+            return False
+        if (head_words & {"film", "films", "cinema", "cinemas", "movie", "movies"}) and "ai" not in head_words:
+            return False
+        return bool((head_words & ai_terms) or "artificial intelligence" in combined or "multi-agent" in combined)
+
+    # 5. Energy / Clean Tech check
+    if any(k in t_clean for k in ("energy", "battery", "clean", "grid", "solar", "wind", "climate", "power")):
+        return bool(words & (energy_only_terms | {"energy", "grid", "battery", "batteries", "solar", "wind", "hydro", "power", "renewable", "climate", "clean"}))
+
+    # 6. Generic custom topic check: require at least one topic keyword token in headline or text
+    topic_tokens = {w for w in re.findall(r"[a-z0-9]{3,}", t_clean) if w not in {"and", "the", "for", "with"}}
+    if topic_tokens:
+        return bool(words & topic_tokens)
+    return True
 
 
 def get_curated_dispatches_for_topic(topic: str) -> List[Dict[str, Any]]:
@@ -454,43 +618,60 @@ class WebResearchService:
         max_results: int = 3,
         geographic_preference: str = "Global",
     ) -> List[CandidateStory]:
+        collected: List[CandidateStory] = []
+        seen_fps: set[str] = set()
+
         if settings.DEMO_CACHE_MODE != "always":
             # Tier 1: Real-Time Live Web RSS News Search (Works across all topics without extra API keys)
             try:
                 live_rss = await self._fetch_live_web_rss(
                     topic, window_start, window_end, max_results, geographic_preference=geographic_preference
                 )
-                valid_rss = [
-                    c for c in live_rss
-                    if not is_refusal_text(c.headline)
-                    and not any(is_refusal_text(s.verbatim_text) for s in c.sources)
-                ]
-                if valid_rss:
-                    return valid_rss[:max_results]
+                for c in live_rss:
+                    if (
+                        not is_refusal_text(c.headline)
+                        and not any(is_refusal_text(s.verbatim_text) for s in c.sources)
+                        and is_story_relevant_to_topic(c.headline, c.summary, topic)
+                        and c.story_fingerprint not in seen_fps
+                    ):
+                        collected.append(c)
+                        seen_fps.add(c.story_fingerprint)
             except Exception:
                 pass
 
-            # Tier 2: Meta Grounded Search (with strict refusal filtering)
-            if settings.has_live_api_key:
+            # Tier 2: Meta Grounded Search (with strict refusal & topic-relevance filtering)
+            if len(collected) < max_results and settings.has_live_api_key:
                 try:
                     live = await self._query_meta_grounded_search(
                         topic, window_start, window_end, max_results, geographic_preference=geographic_preference
                     )
-                    valid_live = [
-                        c for c in live
-                        if not is_refusal_text(c.headline)
-                        and not any(is_refusal_text(s.verbatim_text) for s in c.sources)
-                    ]
-                    if valid_live:
-                        return valid_live[:max_results]
+                    for c in live:
+                        if (
+                            not is_refusal_text(c.headline)
+                            and not any(is_refusal_text(s.verbatim_text) for s in c.sources)
+                            and is_story_relevant_to_topic(c.headline, c.summary, topic)
+                            and c.story_fingerprint not in seen_fps
+                        ):
+                            collected.append(c)
+                            seen_fps.add(c.story_fingerprint)
                 except Exception:
-                    if settings.DEMO_CACHE_MODE == "off":
+                    if settings.DEMO_CACHE_MODE == "off" and not collected:
                         raise
 
-        # Tier 3: Deterministic Curated Primary Source Fallback Dispatches
-        return self._fallback_candidates_for_topic(
-            topic, max_results=max_results, geographic_preference=geographic_preference
-        )
+        # Tier 3: Top up with Deterministic Curated Primary Source Dispatches strictly matching `topic`
+        # so deduplication across consecutive editions never starves a topic section page!
+        if len(collected) < max_results:
+            fallbacks = self._fallback_candidates_for_topic(
+                topic, max_results=max(max_results, 4), geographic_preference=geographic_preference
+            )
+            for fb in fallbacks:
+                if fb.story_fingerprint not in seen_fps:
+                    collected.append(fb)
+                    seen_fps.add(fb.story_fingerprint)
+                if len(collected) >= max_results:
+                    break
+
+        return collected[:max_results]
 
     async def _fetch_live_web_rss(
         self,
@@ -521,7 +702,8 @@ class WebResearchService:
             "australia": ("AU", "en-AU", "AU:en"),
         }
         gl, hl, ceid = geo_map.get(geo_clean.lower(), ("US", "en-US", "US:en"))
-        query_str = topic if geo_clean.lower() in ("global", "world", "") else f"{topic} {geo_clean}"
+        geo_query_part = re.sub(r"[^a-zA-Z0-9\s]", " ", geo_clean).strip()
+        query_str = topic if geo_clean.lower() in ("global", "world", "") else f'"{topic}" {geo_query_part}'
         encoded_topic = urllib.parse.quote(query_str)
         url = f"https://news.google.com/rss/search?q={encoded_topic}&hl={hl}&gl={gl}&ceid={ceid}"
         headers = {
@@ -559,6 +741,9 @@ class WebResearchService:
                     continue
 
                 clean_desc = sanitize_untrusted_web_text(description_raw)
+                if not is_story_relevant_to_topic(clean_headline, clean_desc, topic):
+                    continue
+
                 try:
                     dt = email.utils.parsedate_to_datetime(pub_date_raw)
                     pub_date = dt.strftime("%Y-%m-%d")
