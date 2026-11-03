@@ -25,4 +25,29 @@ if os.getenv("VERCEL") == "1":
         if src_editions.exists() and not dst_editions.exists():
             shutil.copytree(src_editions, dst_editions)
 
-from app.main import app
+from app.main import app as fastapi_app
+
+# Vercel ASGI path normalizer: ensures /api/index.py rewrites resolve to root FastAPI routes
+async def app(scope, receive, send):
+    if scope.get("type") in ("http", "websocket"):
+        headers = dict(scope.get("headers", []))
+        matched = headers.get(b"x-matched-path", b"").decode("utf-8")
+        if matched:
+            if "?" in matched:
+                matched = matched.split("?", 1)[0]
+            if not (matched == "/api/index.py" or matched == "/api/index"):
+                scope["path"] = matched
+
+        path = scope.get("path", "")
+        for prefix in ("/api/index.py", "/api/index"):
+            if path == prefix:
+                scope["path"] = "/"
+                break
+            elif path.startswith(prefix + "/"):
+                scope["path"] = path[len(prefix):]
+                break
+
+        if not scope.get("path", "").startswith("/"):
+            scope["path"] = "/" + scope.get("path", "")
+
+    await fastapi_app(scope, receive, send)
