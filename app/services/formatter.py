@@ -104,6 +104,9 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
     used_filler_paths: set[str] = set()
     seen_story_fps: set[str] = set()
     seen_headlines_norm: set[str] = set()
+    all_edition_headlines_norm: set[str] = {
+        _normalize_headline(a.headline) for p in edition.pages for a in p.articles
+    }
     binance_heist_seen = False
 
     if not getattr(edition, "geographic_preference", None):
@@ -199,12 +202,13 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
                 # Merge any unique sources into Page 1 lead ONLY if it was the same event (not an off-topic story)
                 if not is_off_topic and edition.pages and edition.pages[0].articles:
                     lead_art = edition.pages[0].articles[0]
-                    existing_urls = {s.url for s in lead_art.sources}
-                    for src in art.sources:
-                        if src.url not in existing_urls and len(lead_art.sources) < 5:
-                            lead_art.sources.append(src)
-                            existing_urls.add(src.url)
-                    lead_art.mention_count = max(getattr(lead_art, "mention_count", 1), len(lead_art.sources), 6 if "binance" in lead_art.headline.lower() else 2)
+                    if _normalize_headline(lead_art.headline) == norm_h or (is_binance_event and "binance" in lead_art.headline.lower()):
+                        existing_urls = {s.url for s in lead_art.sources}
+                        for src in art.sources:
+                            if src.url not in existing_urls and len(lead_art.sources) < 5:
+                                lead_art.sources.append(src)
+                                existing_urls.add(src.url)
+                        lead_art.mention_count = max(getattr(lead_art, "mention_count", 1), len(lead_art.sources), 6 if "binance" in lead_art.headline.lower() else 2)
 
                 # Replace duplicate/cloned/off-topic story with an unused verified dispatch strictly matching art.topic
                 replacement_raw = None
@@ -212,7 +216,12 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
                 for raw in matching_dispatches:
                     cand_norm = _normalize_headline(raw["headline"])
                     cand_fp = compute_story_fingerprint(cand_norm, art.topic)
-                    if cand_norm not in seen_headlines_norm and cand_fp not in seen_story_fps and "binance" not in cand_norm:
+                    if (
+                        cand_norm not in seen_headlines_norm
+                        and cand_norm not in all_edition_headlines_norm
+                        and cand_fp not in seen_story_fps
+                        and "binance" not in cand_norm
+                    ):
                         replacement_raw = raw
                         break
 
@@ -223,7 +232,12 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
                         for raw in bucket["stories"]:
                             cand_norm = _normalize_headline(raw["headline"])
                             cand_fp = compute_story_fingerprint(cand_norm, raw["headline"])
-                            if cand_norm not in seen_headlines_norm and cand_fp not in seen_story_fps and "binance" not in cand_norm:
+                            if (
+                                cand_norm not in seen_headlines_norm
+                                and cand_norm not in all_edition_headlines_norm
+                                and cand_fp not in seen_story_fps
+                                and "binance" not in cand_norm
+                            ):
                                 replacement_raw = raw
                                 break
                         if replacement_raw:
@@ -298,6 +312,7 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
                     changed = True
 
             seen_headlines_norm.add(norm_h)
+            all_edition_headlines_norm.add(norm_h)
             seen_story_fps.add(fp)
 
             # Set layout_orientation based on slot placement (Decision #14)

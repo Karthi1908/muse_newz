@@ -163,19 +163,19 @@ def test_per_edition_bespoke_woodcut_freshness_and_topic_matched_comics(tmp_path
         "Finance",
     )
 
-    p1 = build_bespoke_woodcut_png("Movies", "Global Cinema Chains Expand 70mm Runs", "wk_sec_3_feature", "ed_0101_weekly", tmp_path)
-    p2 = build_bespoke_woodcut_png("Movies", "Global Cinema Chains Expand 70mm Runs", "wk_sec_3_feature", "ed_0102_weekly", tmp_path)
-    assert p1.exists() and p2.exists()
-    h1 = hashlib.sha256(p1.read_bytes()).hexdigest()[:16]
-    h2 = hashlib.sha256(p2.read_bytes()).hexdigest()[:16]
+    uri1, b1 = build_bespoke_woodcut_png("Movies", "Global Cinema Chains Expand 70mm Runs", "wk_sec_3_feature", "ed_0101_weekly", tmp_path)
+    uri2, b2 = build_bespoke_woodcut_png("Movies", "Global Cinema Chains Expand 70mm Runs", "wk_sec_3_feature", "ed_0102_weekly", tmp_path)
+    assert uri1.startswith("data:image/png;base64,") and uri2.startswith("data:image/png;base64,")
+    h1 = hashlib.sha256(b1).hexdigest()[:16]
+    h2 = hashlib.sha256(b2).hexdigest()[:16]
     assert h1 != h2, "Every new edition must generate a fresh woodcut image hash"
 
-    c_movie_1 = select_topic_matched_comic("Section: Movies", ["70mm Cinema"], set(), set(), edition_number=15)
-    c_movie_2 = select_topic_matched_comic("Section: Movies", ["70mm Cinema"], set(), set(), edition_number=16)
-    assert c_movie_1["key"] == "cinema_critic"
+    c_movie_1 = select_topic_matched_comic("Section: Movies", set(), set(), edition_number=15, page_number=4)
+    c_movie_2 = select_topic_matched_comic("Section: Movies", set(), set(), edition_number=16, page_number=4)
+    assert c_movie_1["variant_key"] == "cinema_critic"
     assert "comic_cinema_critic.png" in c_movie_1["image_path"]
     assert c_movie_1["dialogue"] != c_movie_2["dialogue"], "Comic dialogue must update across editions"
 
-    c_fin = select_topic_matched_comic("Section: Finance", ["Central Bank Clearing"], set(), set(), edition_number=16)
-    assert c_fin["key"] == "market_oracle"
+    c_fin = select_topic_matched_comic("Section: Finance", set(), set(), edition_number=16, page_number=2)
+    assert c_fin["variant_key"] == "market_oracle"
     assert "comic_market_oracle.png" in c_fin["image_path"]

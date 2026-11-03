@@ -465,17 +465,34 @@ CURATED_TOPIC_DISPATCHES: List[Dict[str, Any]] = [
 ]
 
 
+def _word_or_stem_match(term: str, target_str: str, target_words: set[str]) -> bool:
+    t = term.strip().lower()
+    if not t:
+        return False
+    if " " in t:
+        return t in target_str
+    if t in target_words:
+        return True
+    if len(t) >= 5:
+        stem = t[:5]
+        return any(len(w) >= 5 and (w.startswith(stem) or t.startswith(w[:5])) for w in target_words)
+    return False
+
+
 def topic_matches_bucket(topic: str, bucket_keywords: List[str]) -> bool:
     """
     Checks if a topic string matches any keyword in a curated bucket,
-    including plural/singular, stemming, and common synonym sets.
+    including plural/singular, stemming, and common synonym sets, without
+    false-positive substring collisions (e.g. 'ai' inside 'blockchain').
     """
     t_clean = topic.strip().lower()
+    t_words = set(re.findall(r"[a-z0-9]+", t_clean))
     for kw in bucket_keywords:
         kw_clean = kw.strip().lower()
+        kw_words = set(re.findall(r"[a-z0-9]+", kw_clean))
         if kw_clean == t_clean:
             return True
-        if len(kw_clean) >= 3 and (kw_clean in t_clean or t_clean in kw_clean):
+        if _word_or_stem_match(kw_clean, t_clean, t_words) or _word_or_stem_match(t_clean, kw_clean, kw_words):
             return True
 
     # High-precision semantic synonym sets (strictly separating Finance, Crypto, Movies, AI, Energy, etc.)
@@ -483,15 +500,17 @@ def topic_matches_bucket(topic: str, bucket_keywords: List[str]) -> bool:
         {"movie", "movies", "film", "films", "cinema", "cinematic", "entertainment", "hollywood", "bollywood", "theatrical", "screenplay", "box office"},
         {"finance", "financial", "market", "markets", "economy", "economic", "banking", "treasury", "fintech", "equities", "bonds", "ipo"},
         {"crypto", "cryptocurrency", "bitcoin", "ethereum", "solana", "blockchain", "defi", "web3", "stablecoin", "token", "ledger"},
-        {"ai", "artificial intelligence", "machine learning", "agent", "llm", "neural", "deep learning"},
-        {"clean tech", "clean energy", "energy", "grid", "solar", "battery", "wind", "renewable"},
-        {"semiconductor", "semiconductors", "chip", "chips", "hardware", "lithography"},
-        {"biotech", "medicine", "health", "clinical", "biology", "genomics", "longevity"},
-        {"space", "astronomy", "orbital", "rocket", "aerospace", "satellite"},
+        {"ai", "artificial intelligence", "machine learning", "agent", "agentic", "llm", "neural", "deep learning"},
+        {"clean tech", "clean energy", "energy", "grid", "solar", "battery", "batteries", "wind", "renewable"},
+        {"semiconductor", "semiconductors", "chip", "chips", "hardware", "lithography", "foundry"},
+        {"biotech", "crispr", "medicine", "health", "clinical", "biology", "genomics", "longevity", "therapeutics"},
+        {"space", "astronomy", "orbital", "rocket", "aerospace", "satellite", "lunar"},
     ]
+    kw_joined = " ".join(k.lower() for k in bucket_keywords)
+    kw_all_words = set(re.findall(r"[a-z0-9]+", kw_joined))
     for cluster in synonym_clusters:
-        if any(term in t_clean for term in cluster):
-            if any(term in kw.lower() for kw in bucket_keywords for term in cluster):
+        if any(_word_or_stem_match(term, t_clean, t_words) for term in cluster):
+            if any(_word_or_stem_match(term, kw_joined, kw_all_words) for term in cluster):
                 return True
     return False
 
@@ -507,6 +526,7 @@ def is_story_relevant_to_topic(headline: str, text: str, topic: str) -> bool:
     t_clean = (topic or "").strip().lower()
     if not t_clean or "outside" in t_clean:
         return True
+    t_words = set(re.findall(r"[a-z0-9]+", t_clean))
 
     combined = f"{headline} {text or ''}".lower()
     head_lower = headline.lower()
@@ -545,27 +565,44 @@ def is_story_relevant_to_topic(headline: str, text: str, topic: str) -> bool:
         "ai", "agent", "agents", "agentic", "llm", "llms", "neural", "inference",
         "openai", "anthropic", "gemini", "claude", "gpt", "copilot", "compute",
         "benchmark", "benchmarks", "decoding", "autonomous", "algorithm",
-        "machine", "learning", "models", "model",
+        "machine", "learning", "models", "model", "compiler", "structured",
+    }
+    biotech_terms = {
+        "biotech", "crispr", "gene", "genetic", "genomics", "epigenetic",
+        "reprogramming", "mrna", "cell", "cells", "clinical", "trial", "phase",
+        "patient", "patients", "corneal", "endothelial", "senescence", "hepatic",
+        "pcsk9", "cholesterol", "nanoparticles", "lipid", "therapy", "therapeutics",
+        "remission", "cohort", "adenine", "biomedical", "longevity",
+    }
+    semi_terms = {
+        "semiconductor", "semiconductors", "chip", "chips", "silicon", "wafer",
+        "fab", "fabs", "lithography", "nanometer", "substrate", "substrates",
+        "backside", "foundry", "photoresist", "neon", "interposer", "interposers",
+        "die", "yield", "yields", "transistor",
+    }
+    space_terms = {
+        "space", "orbit", "orbital", "satellite", "satellites", "rocket", "lunar",
+        "astronomy", "aerospace", "mars", "geostationary", "methalox", "payload",
+        "booster", "reentry", "laser", "constellation", "relays", "relay",
     }
 
     # 1. Movies / Film / Cinema check
-    if any(k in t_clean for k in ("movie", "film", "cinema", "entertainment", "hollywood", "bollywood", "theatrical")):
+    if bool(t_words & {"movie", "movies", "film", "films", "cinema", "cinemas", "cinematic", "entertainment", "hollywood", "bollywood", "theatrical"}):
         if words & energy_only_terms:
             return False
         return bool((words & movie_terms) or "box office" in combined)
 
     # 2. Finance / Markets / Banking check
-    if any(k in t_clean for k in ("finance", "financial", "market", "economy", "banking", "fintech", "treasury", "equities")):
+    if bool(t_words & {"finance", "financial", "market", "markets", "economy", "economic", "banking", "fintech", "treasury", "equities", "ipo"}):
         if words & energy_only_terms:
             return False
-        # Reject AI compiler/JSON/agent benchmark articles and film/cinema articles
-        if head_words & {"compiler", "json", "schema", "agent", "agents", "multi-agent", "llm", "neural", "inference", "speculative", "film", "films", "cinema", "cinemas", "movie", "movies", "ramayana", "berlinale", "tiff"}:
+        if head_words & {"compiler", "json", "schema", "agent", "agents", "llm", "neural", "inference", "speculative", "film", "films", "cinema", "cinemas", "movie", "movies", "ramayana", "berlinale", "tiff"}:
             if not (head_words & finance_terms):
                 return False
         return bool(head_words & (finance_terms | {"crypto", "binance", "settlement", "clearing", "heist", "ledger"}))
 
     # 3. Crypto / Blockchain check
-    if any(k in t_clean for k in ("crypto", "bitcoin", "blockchain", "defi", "web3", "ethereum", "token")):
+    if bool(t_words & {"crypto", "cryptocurrency", "bitcoin", "blockchain", "defi", "web3", "ethereum", "token", "tokens", "stablecoin"}):
         if words & energy_only_terms:
             return False
         if head_words & {"compiler", "json", "schema", "film", "films", "cinema", "cinemas", "movie", "movies"}:
@@ -573,7 +610,7 @@ def is_story_relevant_to_topic(headline: str, text: str, topic: str) -> bool:
         return bool((head_words & crypto_terms) or "zero-knowledge" in head_lower or "on-chain" in combined or "digital asset" in combined or "post-quantum" in head_lower)
 
     # 4. AI / Agentic Systems check
-    if t_clean == "ai" or any(k in t_clean for k in ("artificial intelligence", "agent", "machine learning", "llm", "neural")):
+    if bool(t_words & {"ai", "agent", "agents", "agentic", "llm", "llms", "neural"}) or "artificial intelligence" in t_clean or "machine learning" in t_clean:
         if words & energy_only_terms:
             return False
         if "pilot academy" in head_lower or "flying school" in head_lower:
@@ -583,11 +620,23 @@ def is_story_relevant_to_topic(headline: str, text: str, topic: str) -> bool:
         return bool((head_words & ai_terms) or "artificial intelligence" in combined or "multi-agent" in combined)
 
     # 5. Energy / Clean Tech check
-    if any(k in t_clean for k in ("energy", "battery", "clean", "grid", "solar", "wind", "climate", "power")):
+    if bool(t_words & {"energy", "battery", "batteries", "clean", "grid", "solar", "wind", "climate", "power", "renewable", "hydro"}):
         return bool(words & (energy_only_terms | {"energy", "grid", "battery", "batteries", "solar", "wind", "hydro", "power", "renewable", "climate", "clean"}))
 
-    # 6. Generic custom topic check: require at least one topic keyword token in headline or text
-    topic_tokens = {w for w in re.findall(r"[a-z0-9]{3,}", t_clean) if w not in {"and", "the", "for", "with"}}
+    # 6. Biotech / Medicine / CRISPR check
+    if bool(t_words & {"biotech", "crispr", "longevity", "clinical", "health", "medicine", "medical", "gene", "genetics", "genomics", "pharma", "therapeutics", "biology"}):
+        return bool(words & biotech_terms)
+
+    # 7. Semiconductors / Chips check
+    if bool(t_words & {"semiconductor", "semiconductors", "chip", "chips", "silicon", "fab", "hardware", "lithography", "foundry", "wafer"}):
+        return bool(words & semi_terms)
+
+    # 8. Space / Orbital check
+    if bool(t_words & {"space", "launch", "orbit", "orbital", "satellite", "satellites", "rocket", "lunar", "astronomy", "aerospace", "mars"}):
+        return bool(words & space_terms)
+
+    # 9. Generic custom topic check: require at least one topic keyword token in headline or text
+    topic_tokens = {w for w in t_words if len(w) >= 3 and w not in {"and", "the", "for", "with"}}
     if topic_tokens:
         return bool(words & topic_tokens)
     return True
