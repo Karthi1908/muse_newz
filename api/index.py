@@ -1,8 +1,8 @@
 import os
 import shutil
 import sys
+import urllib.parse
 from pathlib import Path
-from starlette.responses import JSONResponse
 
 # Ensure root workspace directory is in python search path
 root_dir = Path(__file__).resolve().parent.parent
@@ -29,47 +29,42 @@ if os.getenv("VERCEL") == "1":
 from app.main import app as fastapi_app
 
 async def app(scope, receive, send):
-    if scope.get("type") == "http":
-        raw_path = scope.get("path", "")
-        # Diagnostic endpoint
-        if raw_path in ("/debug_info", "/api/debug_info", "/api/index.py/debug_info"):
-            headers_dict = {}
+    if scope.get("type") in ("http", "websocket"):
+        query_string = scope.get("query_string", b"").decode("latin-1")
+        if "__path__=" in query_string:
+            parsed_qs = urllib.parse.parse_qs(query_string, keep_blank_values=True)
+            if "__path__" in parsed_qs and parsed_qs["__path__"]:
+                extracted = parsed_qs["__path__"][0]
+                while "//" in extracted:
+                    extracted = extracted.replace("//", "/")
+                scope["path"] = extracted if extracted.startswith("/") else "/" + extracted
+                del parsed_qs["__path__"]
+                new_qs = urllib.parse.urlencode(parsed_qs, doseq=True)
+                scope["query_string"] = new_qs.encode("latin-1")
+        else:
+            headers = {}
             for k, v in scope.get("headers", []):
-                k_str = k.decode("latin-1") if isinstance(k, bytes) else str(k)
+                k_str = k.decode("latin-1").lower() if isinstance(k, bytes) else str(k).lower()
                 v_str = v.decode("latin-1") if isinstance(v, bytes) else str(v)
-                headers_dict[k_str] = v_str
-            resp = JSONResponse({
-                "scope_path": scope.get("path"),
-                "scope_raw_path": scope.get("raw_path", b"").decode("latin-1", errors="ignore") if isinstance(scope.get("raw_path"), bytes) else str(scope.get("raw_path")),
-                "root_path": scope.get("root_path", ""),
-                "headers": headers_dict,
-            })
-            await resp(scope, receive, send)
-            return
+                headers[k_str] = v_str
 
-        headers = {}
-        for k, v in scope.get("headers", []):
-            k_str = k.decode("latin-1").lower() if isinstance(k, bytes) else str(k).lower()
-            v_str = v.decode("latin-1") if isinstance(v, bytes) else str(v)
-            headers[k_str] = v_str
+            matched = headers.get("x-matched-path", "")
+            if matched:
+                if "?" in matched:
+                    matched = matched.split("?", 1)[0]
+                if not matched.startswith("/api/index"):
+                    scope["path"] = matched
 
-        matched = headers.get("x-matched-path", "")
-        if matched:
-            if "?" in matched:
-                matched = matched.split("?", 1)[0]
-            if not matched.startswith("/api/index"):
-                scope["path"] = matched
+            path = scope.get("path", "")
+            for prefix in ("/api/index.py", "/api/index"):
+                if path == prefix:
+                    scope["path"] = "/"
+                    break
+                elif path.startswith(prefix + "/"):
+                    scope["path"] = path[len(prefix):]
+                    break
 
-        path = scope.get("path", "")
-        for prefix in ("/api/index.py", "/api/index"):
-            if path == prefix:
-                scope["path"] = "/"
-                break
-            elif path.startswith(prefix + "/"):
-                scope["path"] = path[len(prefix):]
-                break
-
-        if not scope.get("path", "").startswith("/"):
-            scope["path"] = "/" + scope.get("path", "")
+            if not scope.get("path", "").startswith("/"):
+                scope["path"] = "/" + scope.get("path", "")
 
     await fastapi_app(scope, receive, send)
