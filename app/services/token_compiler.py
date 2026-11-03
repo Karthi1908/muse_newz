@@ -75,8 +75,11 @@ def compile_tokens_css(
   --corrected-removed-bg: {sem["corrected_removed_bg_dark"]};
 }}
 """
-    dst.parent.mkdir(parents=True, exist_ok=True)
-    dst.write_text(css, encoding="utf-8")
+    try:
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_text(css, encoding="utf-8")
+    except OSError:
+        pass
     return css
 
 

@@ -402,6 +402,10 @@ class StorageService:
                 return None
             p = Path(row["json_path"])
             if not p.exists():
+                p = self.editions_dir / edition_id / "edition.json"
+            if not p.exists():
+                p = settings.BASE_DIR / "data" / "sample_seed" / edition_id / "edition.json"
+            if not p.exists():
                 return None
             return PublishedEdition.model_validate_json(p.read_text(encoding="utf-8"))
 

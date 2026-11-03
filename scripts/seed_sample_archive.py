@@ -12,6 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.services.runner import EditionPipelineRunner
 from app.services.storage import StorageService
+from config.settings import settings
 
 
 async def ensure_sample_archive_seeded(storage: StorageService | None = None, force_reseed: bool = False) -> int:
@@ -19,6 +20,32 @@ async def ensure_sample_archive_seeded(storage: StorageService | None = None, fo
     existing = store.list_editions()
     if len(existing) >= 3 and not force_reseed:
         return 0
+
+    # 1. Fast Path (FR-038): Load pre-rendered sample archive if present (<50ms, zero network calls)
+    sample_seed_dir = settings.BASE_DIR / "data" / "sample_seed"
+    if sample_seed_dir.exists() and not force_reseed:
+        import json
+        from app.models.schemas import PublishedEdition
+        from app.services.formatter import NewspaperFormatterService
+        fmt = NewspaperFormatterService()
+        loaded = 0
+        for sub in sorted(sample_seed_dir.iterdir()):
+            j_file = sub / "edition.json"
+            if j_file.exists():
+                try:
+                    ed_dict = json.loads(j_file.read_text(encoding="utf-8"))
+                    edition = PublishedEdition.model_validate(ed_dict)
+                    html_file = next(sub.glob("*_standalone.html"), None)
+                    if html_file and html_file.exists():
+                        html_str = html_file.read_text(encoding="utf-8")
+                    else:
+                        html_str = fmt.render_standalone_html(edition)
+                    store.save_published_edition(edition=edition, standalone_html=html_str, is_sample=True)
+                    loaded += 1
+                except Exception:
+                    pass
+        if loaded >= 3:
+            return loaded
 
     if force_reseed:
         with store._connect() as conn:

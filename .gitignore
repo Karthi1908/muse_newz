@@ -35,4 +35,5 @@ data/*.db
 data/*.db-*
 data/editions/
 data/test_verification_editions/
+muse_data/
 
