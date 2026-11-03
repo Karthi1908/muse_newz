@@ -323,17 +323,28 @@ window.DailyMuseApp = {
     const geoPref = (this.currentProposal && this.currentProposal.proposed_geographic_preference)
       ? this.currentProposal.proposed_geographic_preference
       : this.getSelectedGeoPreference();
-    const resp = await fetch("/api/topics/confirm", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        reader_name: readerName,
-        topics: topicsToSave,
-        geographic_preference: geoPref || "Global",
-      }),
-    });
-    const data = await resp.json();
-    if (data.status === "saved") {
+    let data = null;
+    try {
+      const resp = await fetch("/api/topics/confirm", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reader_name: readerName,
+          topics: topicsToSave,
+          geographic_preference: geoPref || "Global",
+        }),
+      });
+      data = await resp.json().catch(() => null);
+      if (!resp.ok && !(data && data.status === "saved")) {
+        alert("Could not save topics: " + ((data && (data.message || data.detail)) || ("server error " + resp.status)));
+        return;
+      }
+    } catch (err) {
+      alert("Could not save topics: " + err);
+      return;
+    }
+    if (data && data.status === "saved") {
       window.location.reload();
     }
   },

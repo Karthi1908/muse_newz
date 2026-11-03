@@ -1,5 +1,7 @@
 from __future__ import annotations
+import base64
 from contextlib import asynccontextmanager
+import json
 import os
 from pathlib import Path
 from typing import Any, List, Optional
@@ -48,6 +50,41 @@ app = FastAPI(
 
 static_dir = settings.BASE_DIR / "app" / "static"
 app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+
+
+_PROFILE_COOKIE = "muse_reader"
+
+
+def _encode_profile_cookie(profile: ReaderProfile) -> str:
+    raw = json.dumps(profile.model_dump(mode="json"), separators=(",", ":")).encode("utf-8")
+    return base64.urlsafe_b64encode(raw).decode("ascii")
+
+
+def _decode_profile_cookie(value: str) -> Optional[ReaderProfile]:
+    try:
+        data = json.loads(base64.urlsafe_b64decode(value.encode("ascii")).decode("utf-8"))
+        return ReaderProfile(**data)
+    except Exception:
+        return None
+
+
+@app.middleware("http")
+async def hydrate_reader_profile_from_cookie(request: Request, call_next):
+    """
+    Serverless (Vercel) instances each have their own ephemeral /tmp SQLite copy, so a profile saved on one
+    instance is invisible to the next. The reader profile is therefore mirrored in a browser cookie and
+    re-applied to the local store at the start of every request.
+    """
+    if os.getenv("VERCEL") == "1" and not request.url.path.startswith("/static"):
+        cookie_val = request.cookies.get(_PROFILE_COOKIE)
+        if cookie_val:
+            profile = _decode_profile_cookie(cookie_val)
+            if profile is not None and request.url.path != "/api/topics/confirm":
+                try:
+                    storage.save_reader_profile(profile)
+                except Exception:
+                    pass
+    return await call_next(request)
 
 
 class TopicProposeRequest(BaseModel):
@@ -246,24 +283,43 @@ async def confirm_topics(req: TopicConfirmRequest) -> dict[str, Any]:
         topics=req.topics,
         geographic_preference=req.geographic_preference.strip() or current.geographic_preference,
     )
-    storage.save_reader_profile(updated)
+    try:
+        storage.save_reader_profile(updated)
+    except Exception as exc:
+        return JSONResponse(status_code=500, content={"status": "error", "message": f"Could not save topics: {exc}"})
 
     # Also update the latest edition's masthead reader_name & geographic_preference so reload shows the new title immediately
-    latest_ed = storage.get_latest_edition()
-    if latest_ed is not None:
-        latest_ed.reader_name = updated.reader_name
-        latest_ed.geographic_preference = updated.geographic_preference
-        standalone_html = formatter.render_standalone_html(latest_ed)
-        storage.save_published_edition(edition=latest_ed, standalone_html=standalone_html)
+    # (best-effort: a failure here must never block saving the topics themselves)
+    try:
+        latest_ed = storage.get_latest_edition()
+        if latest_ed is not None:
+            latest_ed.reader_name = updated.reader_name
+            latest_ed.geographic_preference = updated.geographic_preference
+            standalone_html = formatter.render_standalone_html(latest_ed)
+            storage.save_published_edition(edition=latest_ed, standalone_html=standalone_html)
+    except Exception:
+        pass
 
-    return {
-        "status": "saved",
-        "reader": {
-            **updated.model_dump(mode="json"),
-            "publication_title": updated.publication_title,
-            "publication_tagline": updated.publication_tagline,
-        },
-    }
+    response = JSONResponse(
+        content={
+            "status": "saved",
+            "reader": {
+                **updated.model_dump(mode="json"),
+                "publication_title": updated.publication_title,
+                "publication_tagline": updated.publication_tagline,
+            },
+        }
+    )
+    response.set_cookie(
+        _PROFILE_COOKIE,
+        _encode_profile_cookie(updated),
+        max_age=60 * 60 * 24 * 365,
+        httponly=True,
+        samesite="lax",
+        secure=os.getenv("VERCEL") == "1",
+        path="/",
+    )
+    return response
 
 
 @app.post("/api/schedule/preview")
