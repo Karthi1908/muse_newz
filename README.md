@@ -89,7 +89,7 @@ The system is organized into a deterministic, verification-gated autonomous pipe
 
 *The Muse Newz* leverages a multi-modal suite of **Meta AI models and APIs** (`https://api.meta.ai/v1`) to power reasoning, automated reporting, computer vision layout segmentation, speech recognition, and editorial illustration:
 
-### 1. Meta Muse Text & Reasoning Models (`muse-spark-1.3` / Meta Llama 3)
+### 1. Meta Muse Text & Reasoning Models (`muse-wonder-1.0` / Meta Llama 3)
 * **Parallel Beat Reporters:** Deconstructs raw dispatches into verified atomic claims and source provenance.
 * **Editor-in-Chief Agent:** Evaluates journalistic magnitude, ranks stories by cross-source mention volume, and resolves slot geometry.
 * **Adversarial Fact-Checker:** Evaluates claim entailment at `temperature=0.0` against ground-truth evidence, enforcing zero hallucination.
@@ -179,7 +179,7 @@ Edit `.env` with your Meta API credentials:
 ```ini
 LLM_API_BASE_URL=https://api.meta.ai/v1
 MODEL_API_KEY=your_meta_model_api_key_here
-MUSE_TEXT_MODEL=muse-spark-1.3
+MUSE_TEXT_MODEL=muse-wonder-1.0
 MUSE_IMAGE_MODEL=muse-image-1.0
 MUSE_VOICE_MODEL=muse-voice-transcribe-1.0
 MUSE_SAM_MODEL=sam-3.1
