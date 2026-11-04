@@ -21,57 +21,57 @@ The system is organized into a deterministic, verification-gated autonomous pipe
 [ Reader Beats & Schedule ]
              │
              ▼
-┌──────────────────────────────────────────────────────────────────┐
-│ STAGE 1: Parallel Beat Reporting (ParallelAgent)                │
-│ • Live Google News RSS & direct web scraping                    │
-│ • Parallel researchers extract dispatches & primary URLs        │
-└─────────────────────────────────┬────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│ STAGE 1: Parallel Beat Reporting (ParallelAgent) ── [muse-wonder-1.0]  │
+│ • Live Google News RSS & direct web scraping                           │
+│ • Parallel researchers extract dispatches & primary URLs               │
+└─────────────────────────────────┬──────────────────────────────────────┘
                                   │
                                   ▼
-┌──────────────────────────────────────────────────────────────────┐
-│ STAGE 1.5: 7-Day Anti-Duplication Filter (StoryDedupService)     │
-│ • Normalizes URLs & checks 7-day lookback window                │
-│ • Prevents repeat stories across editions                        │
-└─────────────────────────────────┬────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│ STAGE 1.5: 7-Day Anti-Duplication Filter ────────── [SQLite Hash DB]   │
+│ • Normalizes URLs & checks 7-day lookback window                       │
+│ • Prevents repeat stories across editions                              │
+└─────────────────────────────────┬──────────────────────────────────────┘
                                   │
                                   ▼
-┌──────────────────────────────────────────────────────────────────┐
-│ STAGE 2: Editorial Synthesis & Manifest Assembly (EditorAgent)   │
-│ • Cross-source clustering & mention_count scoring               │
-│ • Centers biggest breaking story in Front-Page Lead             │
-│ • Curates mandatory "Outside Your Usual Reading" serendipity    │
-└─────────────────────────────────┬────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│ STAGE 2: Editorial Synthesis & Manifest Assembly ── [muse-wonder-1.0]  │
+│ • Cross-source clustering & mention_count scoring                      │
+│ • Centers biggest breaking story in Front-Page Lead                    │
+│ • Curates mandatory "Outside Your Usual Reading" serendipity           │
+└─────────────────────────────────┬──────────────────────────────────────┘
                                   │
                                   ▼
-┌──────────────────────────────────────────────────────────────────┐
-│ STAGE 3: Adversarial Verification Loop (LoopAgent + Gatekeeper)  │
-│ • Writer drafts articles with strict [S#] citations              │
-│ • Fact-Checker (temp=0.0) verifies atomic claims against sources │
-│ • Failed claims stripped to Public Verification Ledger           │
-└─────────────────────────────────┬────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│ STAGE 3: Adversarial Verification Loop ──────────── [muse-wonder-1.0]  │
+│ • Writer drafts articles with strict [S#] citations                    │
+│ • Fact-Checker (temp=0.0) verifies atomic claims against sources       │
+│ • Failed claims stripped to Public Verification Ledger                 │
+└─────────────────────────────────┬──────────────────────────────────────┘
                                   │
                                   ▼
-┌──────────────────────────────────────────────────────────────────┐
-│ STAGE 4: Authentic House Illustrations (IllustratorService)      │
-│ • Generates 19th-century woodcut engravings via muse-image-1.0   │
-│ • Strict perceptual hash deduplication per edition              │
-└─────────────────────────────────┬────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│ STAGE 4: Authentic House Illustrations ──────────── [muse-image-1.0]   │
+│ • Generates 19th-century woodcut engravings via muse-image-1.0         │
+│ • Strict perceptual hash deduplication per edition                     │
+└─────────────────────────────────┬──────────────────────────────────────┘
                                   │
                                   ▼
-┌──────────────────────────────────────────────────────────────────┐
-│ STAGE 4b: SAM-3 Layout Whitespace Analysis & Creative Fillers    │
-│ • Meta SAM-3 segments unallocated white paper margins            │
-│ • WhitespaceCreativeAgent injects:                               │
-│   - "The Muse Newz" house broadside advertisements               │
-│   - Topic-specific Victorian satirical comic strips              │
-└─────────────────────────────────┬────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│ STAGE 4b: Layout Whitespace Analysis & Fillers ──── [sam-3.1 + wonder] │
+│ • Meta SAM-3.1 segments unallocated white paper margins                │
+│ • WhitespaceCreativeAgent (muse-wonder-1.0) crafts:                    │
+│   - "The Muse Newz" house broadside advertisements                     │
+│   - Topic-specific Victorian satirical comic strips                    │
+└─────────────────────────────────┬──────────────────────────────────────┘
                                   │
                                   ▼
-┌──────────────────────────────────────────────────────────────────┐
-│ STAGE 5: Typesetting & Broadsheet Publishing (FormatterService)  │
-│ • 12-column responsive layout + print/PDF engine                 │
-│ • Standalone single-file HTML compilation with Base64 assets     │
-└──────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│ STAGE 5: Typesetting & Broadsheet Publishing ────── [Jinja2 + CSS Engine]
+│ • 12-column responsive layout + print/PDF engine                       │
+│ • Standalone single-file HTML compilation with Base64 assets           │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Key Newsroom Features:
