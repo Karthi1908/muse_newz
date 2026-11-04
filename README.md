@@ -15,6 +15,8 @@ Every printed statement is traced to primary ground-truth sources (`[S1]`, `[S2]
 
 ## ⚙️ How The Muse Newz Works (The Multi-Agent Newsroom)
 
+![Muse Newz Multi-Stage Production Workflow Pipeline](docs/images/pipeline_workflow.jpg)
+
 The system is organized into a deterministic, verification-gated autonomous pipeline:
 
 ```
