@@ -183,24 +183,35 @@ def build_bespoke_woodcut_png(
 
     # Select topic-appropriate woodcut base plates
     if any(k in t_lower or k in h_lower for k in ("movie", "film", "cinema", "theatrical", "box office", "70mm", "festival", "hollywood", "bollywood", "ramayana")):
-        pool_stems = ["movies_70mm_cinema", "movies_film_festival"]
+        pool_stems = ["movies_70mm_cinema", "movies_film_festival", "movies_nitocel_archive"]
     elif any(k in t_lower or k in h_lower for k in ("binance", "heist", "crypto", "bitcoin", "ethereum", "blockchain", "zk", "zero-knowledge", "lattice", "token", "ledger")):
         pool_stems = ["binance_crypto_heist_6b", "crypto_zk_settlement"] if "binance" in h_lower else ["crypto_zk_settlement", "binance_crypto_heist_6b"]
     elif any(k in t_lower or k in h_lower for k in ("finance", "financial", "bank", "banking", "treasury", "sovereign", "market", "fintech", "ipo", "equities", "swap")):
         pool_stems = ["finance_central_bank", "finance_fintech_ipo"]
-    elif any(k in t_lower or k in h_lower for k in ("ai", "agent", "agentic", "model", "neural", "inference", "compute", "cloud")):
-        pool_stems = ["4cb62ff6913707d3", "bae76e76044c7d50"]
-    elif any(k in t_lower or k in h_lower for k in ("energy", "grid", "battery", "sodium", "solar", "wind", "hvdc", "interconnector", "hydro")):
+    elif any(k in t_lower or k in h_lower for k in ("ai", "agent", "agentic", "model", "neural", "inference", "compute", "cloud", "software", "tech")):
+        pool_stems = ["ada8b75736511001", "space_laser_optical_mesh"]
+    elif any(k in t_lower or k in h_lower for k in ("energy", "grid", "battery", "sodium", "solar", "wind", "hvdc", "interconnector", "hydro", "climate")):
         pool_stems = ["clean_energy_sodium_battery", "hvdc_interconnector"]
     elif any(k in t_lower or k in h_lower for k in ("space", "orbit", "satellite", "laser", "rocket", "launch")):
         pool_stems = ["space_laser_optical_mesh"]
     elif any(k in t_lower or k in h_lower for k in ("semiconductor", "chip", "wafer", "fab", "substrate", "lithography")):
-        pool_stems = ["999b39eeba586362"]
+        pool_stems = ["ada8b75736511001", "hvdc_interconnector"]
+    elif any(k in t_lower or k in h_lower for k in ("sport", "game", "cricket", "football", "olympic", "match", "tournament", "league")):
+        pool_stems = ["hvdc_interconnector", "movies_film_festival", "finance_fintech_ipo"]
     else:
-        pool_stems = ["8b7dce16f38a508b", "9dbafebf93066612", "4cb62ff6913707d3"]
+        pool_stems = ["clean_energy_sodium_battery", "finance_central_bank", "movies_70mm_cinema", "space_laser_optical_mesh", "ada8b75736511001"]
 
     chosen_stem = pool_stems[seed_int % len(pool_stems)]
     base_png = c_dir / f"{chosen_stem}.png"
+
+    # Absolute fallback: if chosen_stem is missing, select any existing non-ad, non-comic woodcut from c_dir
+    if not base_png.exists():
+        existing_woodcuts = [
+            p for p in c_dir.glob("*.png")
+            if not p.name.startswith("ad_") and not p.name.startswith("comic_") and p.stat().st_size > 100 * 1024
+        ]
+        if existing_woodcuts:
+            base_png = existing_woodcuts[seed_int % len(existing_woodcuts)]
 
     canvas_w, canvas_h = 720, 420
     canvas = Image.new("RGB", (canvas_w, canvas_h), (242, 236, 224))  # Warm newsprint #F2ECE0
@@ -221,7 +232,12 @@ def build_bespoke_woodcut_png(
             cropped = src_img.crop((dx, dy, dx + cw, dy + ch)).resize((canvas_w - 28, canvas_h - 64), Image.Resampling.LANCZOS)
             canvas.paste(cropped, (14, 14))
         except Exception:
-            pass
+            try:
+                src_img = Image.open(base_png).convert("RGB")
+                resized = src_img.resize((canvas_w - 28, canvas_h - 64), Image.Resampling.LANCZOS)
+                canvas.paste(resized, (14, 14))
+            except Exception:
+                pass
 
     draw = ImageDraw.Draw(canvas)
     ink = (20, 20, 19)

@@ -383,7 +383,8 @@ def normalize_edition_layout_and_centrepiece(edition: PublishedEdition) -> Tuple
             is_svg = current_uri.startswith("data:image/svg+xml")
             uri_hash = hashlib.sha256(current_uri.encode("utf-8")).hexdigest()[:16] if current_uri else ""
 
-            if not current_uri or is_svg or uri_hash in used_hashes:
+            is_tiny_blank = bool(current_uri and len(current_uri) < 30000)
+            if not current_uri or is_svg or is_tiny_blank or uri_hash in used_hashes:
                 bespoke_uri, bespoke_bytes = build_bespoke_woodcut_png(
                     topic=art.topic,
                     headline=art.headline,
